@@ -1,0 +1,76 @@
+---
+title: "R Assignment"
+output: html_document
+---
+Loading libraries
+```{r library}
+library(ggplot2)
+library(dplyr)
+```
+
+Loading and examining the data
+```{r load data and examine}
+data=read.csv("OnlineNewsPopularity.csv")
+glimpse(data)
+dim(data)
+tbl_df(data)
+```
+
+Reducing Data:
+1. __filter__    : To select some rows of the dataset
+2. __select__    : To select columns
+3. __arrange__   : To sort observations
+4. __mutate__    : To modify the structure of the dataset (add variables, etc.)
+5. __summarize__ : Together with group_by(), used to reduce variables to values
+
+```{r reduction}
+data_s = data %>%
+  select(url,
+         num_keywords,
+         n_tokens_title,
+         num_imgs,
+         num_videos,
+         weekday_is_monday, 
+         weekday_is_tuesday, 
+         weekday_is_wednesday,
+         weekday_is_thursday, 
+         weekday_is_friday,
+         weekday_is_saturday,
+         weekday_is_sunday,
+         is_weekend,
+         rate_positive_words,
+         #rate_negative_words,
+         title_sentiment_polarity,
+         shares)
+```
+
+First exploration
+```{r}
+qplot(data=data_s,
+      n_tokens_title,
+      geom="histogram")
+
+qplot(data=data_s,
+      rate_positive_words,
+      shares,
+      log="xy")
+
+cor(data_s$rate_positive_words, data_s$shares)
+  
+
+qplot(data=data_s,
+      title_sentiment_polarity,
+      geom="histogram")   
+
+qplot(data=data_s,
+      title_sentiment_polarity,
+      shares)
+```
+
+
+Mutating variables
+```{r mutate weekday and weekend variables}
+
+
+```
+
