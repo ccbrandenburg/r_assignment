@@ -67,7 +67,7 @@ qplot(data=data_s,
       shares)
 ```
 
-
+lets try to change some stuff
 Mutating variables
 ```{r mutate weekday and weekend variables}
 
