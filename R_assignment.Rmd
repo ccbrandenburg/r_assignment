@@ -86,12 +86,12 @@ Mutating variables
 library(dplyr)
 data_s = data_s %>%
    mutate(weekday = ifelse(weekday_is_monday==1, 1,
-                   ifelse(weekday_is_tuesday==1, 2,
-                   ifelse(weekday_is_wednesday==1, 3,
-                   ifelse(weekday_is_thursday==1, 4,
-                   ifelse(weekday_is_friday==1, 5,
-                   ifelse(weekday_is_saturday==1, 6,
-                   ifelse(weekday_is_sunday==1, 7,0)))))))) %>%
+                    ifelse(weekday_is_tuesday==1, 2,
+                    ifelse(weekday_is_wednesday==1, 3,
+                    ifelse(weekday_is_thursday==1, 4,
+                    ifelse(weekday_is_friday==1, 5,
+                    ifelse(weekday_is_saturday==1, 6,
+                    ifelse(weekday_is_sunday==1, 7,0)))))))) %>%
   mutate(weekday_flag = ifelse(weekday<=5, 1, 0))
  
 qplot(data=data_s,
