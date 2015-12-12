@@ -39,7 +39,7 @@ data_s = data %>%
          weekday_is_sunday,
          is_weekend,
          rate_positive_words,
-         #rate_negative_words,
+         rate_negative_words,
          title_sentiment_polarity,
          shares)
 ```
@@ -67,9 +67,20 @@ qplot(data=data_s,
       shares)
 ```
 
-lets try to change some stuff
 Mutating variables
 ```{r mutate weekday and weekend variables}
+library(dplyr)
+dataS= data_s %>%
+  mutate(weekday = ifelse(weekday_is_monday==1, 1,
+                   ifelse(weekday_is_tuesday==1, 1,
+                   ifelse(weekday_is_wednesday==1, 1,
+                   ifelse(weekday_is_thursday==1, 1,
+                   ifelse(weekday_is_friday==1, 1, 0)))))) %>%
+  mutate(weekend = is_weekend)
+                        
+sum(dataS$weekend)              
+sum(dataS$weekday)
+
 
 
 ```
