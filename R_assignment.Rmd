@@ -2,6 +2,16 @@
 title: "R Assignment"
 output: html_document
 ---
+Questions we might want to answer, just add below:
+
+Is there a relationship between topic and shares?
+If so what is the best performing topic?
+
+Weekday vs weekends
+-which topics perform best when?
+
+
+
 Loading libraries
 ```{r library}
 library(ggplot2)
@@ -24,6 +34,8 @@ Reducing Data:
 5. __summarize__ : Together with group_by(), used to reduce variables to values
 
 ```{r reduction}
+#reducing the dataset to relevent variables
+#feel free to add any. I would say we try to have our code mainly refer to the below dataset, fine?
 data_s = data %>%
   select(url,
          num_keywords,
@@ -57,7 +69,6 @@ qplot(data=data_s,
 
 cor(data_s$rate_positive_words, data_s$shares)
   
-
 qplot(data=data_s,
       title_sentiment_polarity,
       geom="histogram")   
@@ -70,7 +81,7 @@ qplot(data=data_s,
 Mutating variables
 ```{r mutate weekday and weekend variables}
 library(dplyr)
-dataS= data_s %>%
+data_s = data_s %>%
   mutate(weekday = ifelse(weekday_is_monday==1, 1,
                    ifelse(weekday_is_tuesday==1, 1,
                    ifelse(weekday_is_wednesday==1, 1,
@@ -80,6 +91,8 @@ dataS= data_s %>%
                         
 sum(dataS$weekend)              
 sum(dataS$weekday)
+
+
 
 
 
