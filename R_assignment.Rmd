@@ -20,10 +20,11 @@ library(dplyr)
 
 Loading and examining the data
 ```{r load data and examine}
-data=read.csv("OnlineNewsPopularity.csv")
+data=read.csv("OnlineNewsPopularity.csv", stringsAsFactors = FALSE)
 glimpse(data)
 dim(data)
 tbl_df(data)
+head(data)
 ```
 
 Reducing Data:
@@ -125,6 +126,7 @@ sum(data_s$weekday)
 Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
-data_s$url[which.max(data_s$url)]
+data_s$url[which.max(data_s$shares)]
+
 ```
 
