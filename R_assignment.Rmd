@@ -50,6 +50,7 @@ data_s = data %>%
          n_tokens_title,
          num_imgs,
          num_videos,
+         n_tokens_content, 
          weekday_is_monday, 
          weekday_is_tuesday, 
          weekday_is_wednesday,
@@ -152,14 +153,13 @@ Question: Mean shares per group
 anova(data_s$data_channel, data_s$shares)
 ```
 
-3. Categories
+3. Categories & weekdays
 ```{r}
 summary(aov(data_s$shares ~ data_s$weekday))
 qplot(data=data_s,
       factor(weekday),
       log(shares),
       position="jitter")
-
 
 summary(aov(data_s$shares ~ data_s$data_channel))
 qplot(data=data_s,
@@ -171,7 +171,48 @@ qplot(data=data_s,
 
 
 summary(data_s$shares)
-=======
->>>>>>> 959648d776ee41a122a59e84d0b3bc005664937e
+
+
+```
+
+Regression Analysis:
+Images
+```{r images}
+#Videos to shares
+qplot(data=data_s[data_s$data_channel=="World",],
+      num_imgs,
+      shares,
+      xlim=c(0, 25),
+      ylim=c(0,5000),
+      colour=data_channel,
+      xlab="Number of videos",
+      ylab="Number of Shares",
+      main="Relationship between Shares and videos") +
+  geom_smooth(method="lm", se=FALSE)
+cor(data_s[data_s$data_channel=="World",]$shares, data_s$num_imgs)
+lm
+
+
+#Images
+
+#Internal Href Links
+
+#keywords in title
+
+#token length (wordcount)
+
+cor(data_s$weekday, data_s$shares)
+
+
+#Days and cat into factors
+
+```
+
+
+```{r summary echo=TRUE}
+summary(data_s)
+qplot(data=data,
+      shares,
+      )
 ```
 
