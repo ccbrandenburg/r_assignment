@@ -143,6 +143,7 @@ Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
 data_s$url[which.max(data_s$shares)]
+<<<<<<< HEAD
 max(data_s$shares)
 ```
 
@@ -170,5 +171,7 @@ qplot(data=data_s,
 
 
 summary(data_s$shares)
+=======
+>>>>>>> 959648d776ee41a122a59e84d0b3bc005664937e
 ```
 
