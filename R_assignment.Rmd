@@ -137,10 +137,5 @@ Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
 data_s$url[which.max(data_s$shares)]
-<<<<<<< HEAD
-
-=======
-max(data_s$shares)
->>>>>>> 8befbc571ae35e198e5c3c3df94b00280bbec747
 ```
 
