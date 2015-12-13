@@ -26,7 +26,13 @@ glimpse(data)
 dim(data)
 tbl_df(data)
 head(data)
+
+
+#PCA
+log.data = log
 ```
+
+Summary
 
 Reducing Data:
 1. __filter__    : To select some rows of the dataset
@@ -121,7 +127,7 @@ data_s = data_s %>%
 
 qplot(data=data_s,
       factor(weekday),
-      shares,
+      log(shares),
       position="jitter")
 #number of articles per section
 qplot(data=data_s,
@@ -137,10 +143,32 @@ Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
 data_s$url[which.max(data_s$shares)]
-<<<<<<< HEAD
-
-=======
 max(data_s$shares)
->>>>>>> 8befbc571ae35e198e5c3c3df94b00280bbec747
+```
+
+Question: Mean shares per group
+```{r}
+anova(data_s$data_channel, data_s$shares)
+```
+
+3. Categories
+```{r}
+summary(aov(data_s$shares ~ data_s$weekday))
+qplot(data=data_s,
+      factor(weekday),
+      log(shares),
+      position="jitter")
+
+
+summary(aov(data_s$shares ~ data_s$data_channel))
+qplot(data=data_s,
+      factor(data_channel),
+      log(shares),
+      position="jitter")
+
+
+
+
+summary(data_s$shares)
 ```
 
