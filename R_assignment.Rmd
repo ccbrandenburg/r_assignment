@@ -85,18 +85,28 @@ Mutating variables
 ```{r mutate weekday and weekend variables}
 library(dplyr)
 data_s = data_s %>%
-   mutate(weekday = ifelse(weekday_is_monday==1, 1,
+  #create weekday variable 
+  mutate(weekday = ifelse(weekday_is_monday==1, 1,
                     ifelse(weekday_is_tuesday==1, 2,
                     ifelse(weekday_is_wednesday==1, 3,
                     ifelse(weekday_is_thursday==1, 4,
                     ifelse(weekday_is_friday==1, 5,
                     ifelse(weekday_is_saturday==1, 6,
                     ifelse(weekday_is_sunday==1, 7,0)))))))) %>%
-  mutate(weekday_flag = ifelse(weekday<=5, 1, 0))
+  mutate(weekday_flag = ifelse(weekday<=5, 1, 0)) %>%
+  #create channel variable
+  mutate(data_channel = ifelse(data_channel_is_entertainment==1, "Entertainment",
+                        ifelse(data_channel_is_bus==1, "Business",
+                        ifelse(data_channel_is_socmed==1, "Social Media",
+                        ifelse(data_channel_is_tech==1, "Tech",
+                        ifelse(data_channel_is_world==1, "World",
+                        ifelse(data_channel_is_lifestyle==1, "Lifestyle", 0)))))))
  
+
 qplot(data=data_s,
       factor(weekday),
       shares)
+
 
 
                         
