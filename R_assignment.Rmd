@@ -140,6 +140,80 @@ sum(data_s$weekday_flag)
 sum(data_s$weekday)
 ```
 
+2. Differences in days of the week
+``` {r weekdays}
+
+
+# NEED TO t.test for weekday vs. weekend
+
+
+qplot(data=data_s, x=factor(weekday), y=shares)
+qplot(data=data_s, factor(weekday), log(shares), position="jitter")
+
+# check box plot to see if we can use ANOVA --- WTF IS THIS?
+qplot(data=data_s, factor(weekday), shares, geom="boxplot") + coord_flip() + scale_y_discrete(breaks=0:2000)
+
+# To adjust for exponential scale, we took the logarthmic value of the # of shares
+qplot(data=data_s, factor(weekday), log(shares), geom="boxplot") + coord_flip()
+
+# It's clear that variances are fairly similar each day, implying it is okay to use ANOVA. At first glance, the means appear to be similar (bearing in mind that we've taken the log), but we will verify with an ANOVA test
+
+# H0 is that there are no differences in the number of shares in any given day
+# Ha is that there ARE differences in the number of shares in any given day
+
+summary(aov(data_s$shares ~ data_s$weekday))
+
+# The p-value is 0.314, so with 95% confidence we can accept that there are no statistically significant differences in number of shares between the days of the week.
+
+
+
+
+```
+
+
+``` {r channels}
+3. 
+
+qplot(data=data_s, factor(data_channel), shares)
+qplot(data=data_s, factor(data_channel), log(shares), position="jitter")
+
+# check box plot to see if we can use ANOVA
+qplot(data=data_s, factor(data_channel), shares, geom="boxplot") + coord_flip()
+
+# To adjust for exponential scale, we took the logarthmic value of the # of shares
+qplot(data=data_s, factor(data_channel), log(shares), geom="boxplot") + coord_flip()
+
+# COMMENT ABOUT POSSIBLE DIFFERENCES IN VARIANCES
+
+# H0 is that there are no differences in the number of shares between data_channels (topics)
+# Ha is that there ARE differences in the number of shares between data_channels (topics)
+
+summary(aov(data_s$shares ~ data_s$data_channel))
+
+# The p-value is <2e-16, so with 95% confidence we can accept that there are no statistically significant differences in number of shares between the days of the week.
+
+
+# REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
+
+noOther <- data_s %>%
+  select(shares, data_channel) %>%
+  filter(data_channel!="Other")
+
+count(noOther)/count(data_s)
+
+qplot(data=noOther, factor(data_channel), log(shares), geom="boxplot") + coord_flip()
+# now they look good enough
+
+summary(aov(noOther$shares ~ noOther$data_channel))
+
+# anova still has p-value < alpha ---->>>>>>> statistically significant. Reject H0
+
+
+# NEXT FIND THE BEST TOPIC FOR SHARING / OR / RANK THE TOPICS
+
+
+```
+
 Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
