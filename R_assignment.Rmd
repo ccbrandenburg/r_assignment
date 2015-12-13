@@ -212,6 +212,14 @@ summary(aov(noOther$shares ~ noOther$data_channel))
 # NEXT FIND THE BEST TOPIC FOR SHARING / OR / RANK THE TOPICS
 
 
+# calculates the means for each category
+
+data_s %>%
+  select(shares, data_channel) %>%
+  group_by(data_channel) %>%
+  summarise(mean(shares,na.rm = TRUE ))
+
+
 ```
 
 Question: Which article was shared the most?
