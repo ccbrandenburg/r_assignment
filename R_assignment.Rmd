@@ -59,6 +59,11 @@ data_s = data %>%
          data_channel_is_world,
          data_channel_is_entertainment,
          data_channel_is_bus,
+         title_subjectivity,
+         title_sentiment_polarity,
+         abs_title_subjectivity,
+         abs_title_sentiment_polarity,
+         average_token_length,
          shares)
 ```
 
@@ -107,11 +112,15 @@ data_s = data_s %>%
                         ifelse(data_channel_is_tech==1, "Tech",
                         ifelse(data_channel_is_world==1, "World",
                         ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
- 
+
+
+
+
 
 qplot(data=data_s,
       factor(weekday),
-      shares)
+      shares,
+      position="jitter")
 #number of articles per section
 qplot(data=data_s,
       data_channel,
@@ -125,6 +134,7 @@ sum(data_s$weekday)
 Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
-data_s$url[which.max(data_s$url)]
+data_s$url[which.max(data_s$shares)]
+max(data_s$shares)
 ```
 
