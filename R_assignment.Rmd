@@ -53,6 +53,12 @@ data_s = data %>%
          rate_positive_words,
          rate_negative_words,
          title_sentiment_polarity,
+         data_channel_is_lifestyle,
+         data_channel_is_socmed,
+         data_channel_is_tech,
+         data_channel_is_world,
+         data_channel_is_entertainment,
+         data_channel_is_bus,
          shares)
 ```
 
@@ -100,18 +106,20 @@ data_s = data_s %>%
                         ifelse(data_channel_is_socmed==1, "Social Media",
                         ifelse(data_channel_is_tech==1, "Tech",
                         ifelse(data_channel_is_world==1, "World",
-                        ifelse(data_channel_is_lifestyle==1, "Lifestyle", 0)))))))
+                        ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
  
 
 qplot(data=data_s,
       factor(weekday),
       shares)
-
-
+#number of articles per section
+qplot(data=data_s,
+      data_channel,
+      geom="histogram")
 
                         
-sum(dataS$weekend)              
-sum(dataS$weekday)
+sum(data_s$weekday_flag)              
+sum(data_s$weekday)
 ```
 
 Question: Which article was shared the most?
