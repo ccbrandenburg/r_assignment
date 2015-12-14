@@ -98,8 +98,23 @@ qplot(data=data_s,
       shares)
 
 summary(data_s$shares)
+```
+
+Trying out some stuff with graphs and overviews of weekday/categories
+```{r}
+#Avg Shares and articles published by category
+category_overview= data_s %>%
+  group_by(data_channel) %>%
+  summarise(avg_shares=mean(shares), article_count=length(shares))
+
+#Avg. Shares and articles published by weekday
+data_s %>%
+  group_by(weekday) %>%
+  summarise(avg_shares=mean(shares), article_count=length(shares))
+
 
 ```
+
 
 Mutating variables
 ```{r mutate weekday and weekend variables}
