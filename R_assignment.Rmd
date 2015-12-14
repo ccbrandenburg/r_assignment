@@ -32,7 +32,6 @@ head(data)
 log.data = log
 ```
 
-Summary
 
 Reducing Data:
 1. __filter__    : To select some rows of the dataset
@@ -98,19 +97,30 @@ qplot(data=data_s,
       shares)
 
 summary(data_s$shares)
+
+#Avg Shares and articles published by category
+category_overview= data_s %>%
+  group_by(data_channel) %>%
+  summarise(avg_shares=mean(shares), 
+            median_shares=median(shares),
+            max_shares=max(shares),
+            min_shares=min(shares),
+            article_count=length(shares))
+
+#Avg Shares and articles published by weekday
+weekday_overview= data_s %>%
+  group_by(weekday) %>%
+  summarise(avg_shares=mean(shares), 
+            median_shares=median(shares),
+            max_shares=max(shares),
+            min_shares=min(shares),
+            article_count=length(shares))
+
+
 ```
 
 Trying out some stuff with graphs and overviews of weekday/categories
 ```{r}
-#Avg Shares and articles published by category
-category_overview= data_s %>%
-  group_by(data_channel) %>%
-  summarise(avg_shares=mean(shares), article_count=length(shares))
-
-#Avg. Shares and articles published by weekday
-data_s %>%
-  group_by(weekday) %>%
-  summarise(avg_shares=mean(shares), article_count=length(shares))
 
 
 ```
@@ -138,17 +148,22 @@ data_s = data_s %>%
                         ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
 
 
-
-
-
 qplot(data=data_s,
       factor(weekday),
       log(shares),
       position="jitter")
 #number of articles per section
 qplot(data=data_s,
-      data_channel,
-      geom="histogram")
+      aes(x=reorder(data_channel,data_channel, function(x)-length(x))))+ geom_bar()
+
+
+ggplot(theTable,
+       aes(x=reorder(Position,Position,
+                     function(x)-length(x)))) +
+       geom_bar()
+
+ggplot(data_s, aes(x=reorder(data_channel, shares), y=shares, fill=reorder(data_channel, shares))) + geom_bar(stat=) + theme(axis.text.x=element_text(angle=45, vjust=0.5))
+
 
                         
 sum(data_s$weekday_flag)              
