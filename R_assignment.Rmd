@@ -130,10 +130,7 @@ data_s = data_s %>%
                         ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
 
 
-qplot(data=data_s,
-      factor(weekday),
-      log(shares),
-      position="jitter")
+#playing around below
 #number of articles per section
 qplot(data=data_s,
       aes(x=reorder(data_channel,data_channel, function(x)-length(x))))+ geom_bar()
@@ -143,7 +140,7 @@ ggplot(theTable,
        aes(x=reorder(Position,Position,
                      function(x)-length(x)))) +
        geom_bar()
-
+#trying to reorder things
 ggplot(data_s, aes(x=reorder(data_channel, shares), y=shares, fill=reorder(data_channel, shares))) + geom_bar(stat=) + theme(axis.text.x=element_text(angle=45, vjust=0.5))
 
 
@@ -152,32 +149,8 @@ sum(data_s$weekday_flag)
 sum(data_s$weekday)
 ```
 
-2. Differences in days of the week
-``` {r weekdays}
-
-
-# NEED TO t.test for weekday vs. weekend
-
-
-qplot(data=data_s, x=factor(weekday), y=shares)
-qplot(data=data_s, factor(weekday), log(shares), position="jitter")
-
-# check box plot to see if we can use ANOVA --- WTF IS THIS?
-qplot(data=data_s, factor(weekday), shares, geom="boxplot") + coord_flip() + scale_y_discrete(breaks=0:2000)
-
-# To adjust for exponential scale, we took the logarthmic value of the # of shares
-qplot(data=data_s, factor(weekday), log(shares), geom="boxplot") + coord_flip()
-
-# It's clear that variances are fairly similar each day, implying it is okay to use ANOVA. At first glance, the means appear to be similar (bearing in mind that we've taken the log), but we will verify with an ANOVA test
-
-# H0 is that there are no differences in the number of shares in any given day
-# Ha is that there ARE differences in the number of shares in any given day
-
-summary(aov(data_s$shares ~ data_s$weekday))
-
-# The p-value is 0.314, so with 95% confidence we can accept that there are no statistically significant differences in number of shares between the days of the week.
-
-
+2. anything we can put before we deepdive into channels and weekdays?
+``` {r stuff here}
 
 
 ```
@@ -193,16 +166,31 @@ category_overview= data_s %>%
             min_shares=min(shares),
             sd_shares=sd(shares),
             article_count=length(shares))
-qplot(data=data_s, factor(data_channel), shares)
+
+qplot(data=data_s,
+      factor(data_channel), 
+      shares)
 
 #Introducing some colors
-qplot(data=data_s, factor(data_channel), log(shares), position="jitter", colour=data_channel)
+qplot(data=data_s, 
+      factor(data_channel), 
+      log(shares), 
+      position="jitter", 
+      colour=data_channel)
 
 # check box plot to see if we can use ANOVA
-qplot(data=data_s, factor(data_channel), shares, geom="boxplot") + coord_flip()
+qplot(data=data_s, 
+      factor(data_channel), 
+      shares, 
+      geom="boxplot") + 
+  coord_flip()
 
 # To adjust for exponential scale, we took the logarthmic value of the # of shares
-qplot(data=data_s, factor(data_channel), log(shares), geom="boxplot") + coord_flip()
+qplot(data=data_s, 
+      factor(data_channel), 
+      log(shares),
+      geom="boxplot") + 
+  coord_flip()
 
 # COMMENT ABOUT POSSIBLE DIFFERENCES IN VARIANCES
 
@@ -231,20 +219,13 @@ summary(aov(noOther$shares ~ noOther$data_channel))
 
 
 # NEXT FIND THE BEST TOPIC FOR SHARING / OR / RANK THE TOPICS
-
-
-# calculates the means for each category
-
-data_s %>%
-  select(shares, data_channel) %>%
-  group_by(data_channel) %>%
-  summarise(mean(shares,na.rm = TRUE ))
-
-
 ```
 
 4. Looking at data at the weekday level
-``` {r weekdays}
+``` {r weekday analysis}
+# check box plot to see if we can use ANOVA --- WTF IS THIS? Still what is this??
+qplot(data=data_s, factor(weekday), shares, geom="boxplot") + coord_flip() + scale_y_discrete(breaks=0:2000)
+
 #Avg Shares and articles published by weekday <-- added this here as an overview
 weekday_overview= data_s %>%
   group_by(weekday) %>%
@@ -277,17 +258,14 @@ qplot(data=data_s,
       log(shares), 
       geom="boxplot") + 
   coord_flip()
+# It's clear that variances are fairly similar each day, implying it is okay to use ANOVA. At first glance, the means appear to be similar (bearing in mind that we've taken the log), but we will verify with an ANOVA test
 
-# COMMENT ABOUT POSSIBLE DIFFERENCES IN VARIANCES
-
-# H0: there are no differences in the number of shares between the days that articles are posted
-# Ha: there ARE differences in the number of shares between the days that articles are posted
-
+# H0: there are no differences in the number of shares in any given day
+# Ha: there ARE differences in the number of shares in any given day
 summary(aov(data_s$shares ~ data_s$weekday))
 
 # The p-value is 0.314, so we do not reject H0 that there are no statistically significant differences in number of shares between the days of the week.
 ## if p< 5% (significance level) ->reject
-
 
 # Judging by the table above saturday and sundays seem to have higher means. There might be a difference in shares between weekends and weekdays? 
 weekend_overview= data_s %>%
@@ -326,29 +304,7 @@ Question: Mean shares per group
 anova(data_s$data_channel, data_s$shares)
 ```
 
-3. Categories & weekdays
-```{r}
-summary(aov(data_s$shares ~ data_s$weekday))
-qplot(data=data_s,
-      factor(weekday),
-      log(shares),
-      position="jitter")
-
-summary(aov(data_s$shares ~ data_s$data_channel))
-qplot(data=data_s,
-      factor(data_channel),
-      log(shares),
-      position="jitter")
-
-
-
-
-summary(data_s$shares)
-
-
-```
-
-Regression Analysis:
+5. Regression Analysis:
 Images
 ```{r images}
 #Videos to shares
@@ -382,7 +338,7 @@ cor(data_s$weekday, data_s$shares)
 ```
 
 
-```{r summary echo=TRUE}
+```{r summary}
 summary(data_s)
 qplot(data=data,
       shares,
