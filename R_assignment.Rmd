@@ -205,7 +205,9 @@ summary(aov(data_s$shares ~ data_s$weekday))
 3. 
 
 qplot(data=data_s, factor(data_channel), shares)
-qplot(data=data_s, factor(data_channel), log(shares), position="jitter")
+
+#Introducing some colors
+qplot(data=data_s, factor(data_channel), log(shares), position="jitter", colour=data_channel)
 
 # check box plot to see if we can use ANOVA
 qplot(data=data_s, factor(data_channel), shares, geom="boxplot") + coord_flip()
