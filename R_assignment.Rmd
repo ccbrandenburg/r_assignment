@@ -187,7 +187,7 @@ summary(aov(data_s$shares ~ data_s$weekday))
 #Avg Shares and articles published by category  <-- added this here as an overview
 category_overview= data_s %>%
   group_by(data_channel) %>%
-  summarise(avg_shares=mean(shares), 
+  summarise(avg_shares=mean(shares, na.rm = TRUE), 
             median_shares=median(shares),
             max_shares=max(shares),
             min_shares=min(shares),
@@ -248,7 +248,7 @@ data_s %>%
 #Avg Shares and articles published by weekday <-- added this here as an overview
 weekday_overview= data_s %>%
   group_by(weekday) %>%
-  summarise(avg_shares=mean(shares), 
+  summarise(avg_shares=mean(shares, na.rm = TRUE), 
             median_shares=median(shares),
             max_shares=max(shares),
             min_shares=min(shares),
@@ -286,17 +286,21 @@ qplot(data=data_s,
 summary(aov(data_s$shares ~ data_s$weekday))
 
 # The p-value is 0.314, so we do not reject H0 that there are no statistically significant differences in number of shares between the days of the week.
+## if p< 5% (significance level) ->reject
 
 
-# There might be a difference in shares between weekends and weekdays? 
+# Judging by the table above saturday and sundays seem to have higher means. There might be a difference in shares between weekends and weekdays? 
 weekend_overview= data_s %>%
   group_by(weekday_flag) %>%
-  summarise(avg_shares=mean(shares), 
+  summarise(avg_shares=mean(shares, na.rm = TRUE), 
             median_shares=median(shares),
             max_shares=max(shares),
             min_shares=min(shares),
             sd_shares=sd(shares),
             article_count=length(shares))
+
+# H0: there are no differences in the number of shares on weekdays vs weekends
+# Ha: there ARE differences in the number of shares on weekdays vs weekends.
 
 qplot(data=data_s,
       factor(weekday_flag),
@@ -306,22 +310,7 @@ qplot(data=data_s,
 #visually there does not seem to be a significant difference
 
 summary(aov(data_s$shares ~ data_s$weekday_flag))
-
-
-# anova still has p-value < alpha ---->>>>>>> statistically significant. Reject H0
-
-
-# NEXT FIND THE BEST TOPIC FOR SHARING / OR / RANK THE TOPICS
-
-
-# calculates the means for each category
-
-data_s %>%
-  select(shares, data_channel) %>%
-  group_by(data_channel) %>%
-  summarise(mean(shares,na.rm = TRUE ))
-
-
+#The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 ```
 
 Question: Which article was shared the most?
