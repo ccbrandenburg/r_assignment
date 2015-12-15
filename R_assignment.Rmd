@@ -350,10 +350,12 @@ cor(data_s$weekday, data_s$shares)
 ```{r messing around}
 summary(data_s)
 
+#plotting images
 ggplot(aes(y=shares, x=num_imgs), data=data_s) + 
-  geom_point() +
+  geom_point(alpha=1/20) +
   ylim(0, quantile(data_s$shares, probs=0.95)) +
   geom_smooth(method="lm", color="red")
+  
   
 
 ```
