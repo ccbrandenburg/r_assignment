@@ -109,6 +109,9 @@ summary(data_s$shares)
 Trying out some stuff with graphs and overviews of weekday/categories
 ```{r}
 
+qplot(data=data_s, x=factor(data_channel), y=1, size=shares, scale_y_discrete(0.5,1.5))
+
+
 
 ```
 
@@ -156,6 +159,7 @@ sum(data_s$weekday)
 2. anything we can put before we deepdive into channels and weekdays?
 ``` {r stuff here}
 
+#summary information
 
 ```
 
