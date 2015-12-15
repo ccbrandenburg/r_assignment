@@ -84,7 +84,12 @@ qplot(data=data_s,
 qplot(data=data_s,
       rate_positive_words,
       shares,
-      log="xy")
+      log="xy") +
+  geom_point(alpha=1/200)
+
+ggplot (aes(x=rate_positive_words, y=shares), data=data_s, log="xy") +
+    geom_point(alpha=1/20) +
+    xlim(13,90)
 
 cor(data_s$rate_positive_words, data_s$shares)
   
@@ -144,7 +149,6 @@ ggplot(theTable,
 ggplot(data_s, aes(x=reorder(data_channel, shares), y=shares, fill=reorder(data_channel, shares))) + geom_bar(stat=) + theme(axis.text.x=element_text(angle=45, vjust=0.5))
 
 
-                        
 sum(data_s$weekday_flag)              
 sum(data_s$weekday)
 ```
@@ -236,14 +240,14 @@ weekday_overview= data_s %>%
             sd_shares=sd(shares),
             article_count=length(shares))
 
-qplot(data=data_s, factor(weekday), shares)
-
-#Introducing some colors
+#Plotting the all articles' shares per weekday
 qplot(data=data_s, 
       factor(weekday),
       log(shares), 
       position="jitter", 
-      colour=factor(weekday))
+      colour=factor(weekday),
+      main="Article shares per Weekday")
+  
 
 # check box plot to see if we can use ANOVA
 qplot(data=data_s, 
@@ -313,11 +317,12 @@ qplot(data=data_s[data_s$data_channel=="World",],
       shares,
       xlim=c(0, 25),
       ylim=c(0,5000),
-      colour=data_channel,
+      #colour=data_channel,
       xlab="Number of videos",
       ylab="Number of Shares",
       main="Relationship between Shares and videos") +
-  geom_smooth(method="lm", se=FALSE)
+  geom_smooth(method="lm", se=FALSE) 
+  
 cor(data_s[data_s$data_channel=="World",]$shares, data_s$num_imgs)
 lm
 
@@ -338,7 +343,7 @@ cor(data_s$weekday, data_s$shares)
 ```
 
 
-```{r summary}
+```{r messing around}
 summary(data_s)
 qplot(data=data,
       shares,
