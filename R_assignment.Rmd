@@ -303,7 +303,7 @@ Question: Which article was shared the most?
 ```{r}
 #Article with the highest number of shares
 data_s$url[which.max(data_s$shares)]
-<<<<<<< HEAD
+#<<<<<<< HEAD
 max(data_s$shares)
 ```
 
@@ -327,8 +327,55 @@ qplot(data=data_s[data_s$data_channel=="World",],
       main="Relationship between Shares and videos") +
   geom_smooth(method="lm", se=FALSE) 
   
+
 cor(data_s[data_s$data_channel=="World",]$shares, data_s$num_imgs)
 lm
+
+
+# build regression here?
+
+
+
+
+
+
+
+
+
+# rename final model fit for regression diagnostics
+fit <- 
+
+# check for linearity - pattern in residuals?
+qplot(predict(fit), resid(fit), geom="point") + geom_hline(yintercept=0)
+# no clear patterns --> OK
+
+# check for normality - 2 graphs (histogram vs. normal curve & sample-v-theoretical values)
+qplot(rstandard(fit), geom="blank") + geom_histogram(aes(y=..density..), binwidth=0.5) + stat_function(fun=dnorm, args=list(mean=0,sd=1))
+# looks normal --> OK
+
+qplot(sample=rstandard(fit)) + geom_abline(slope=1, intercept=0)
+# follows theoretical line more or less... a little  polynomial looking
+
+# check for  homoschedacity
+qplot(predict(fit), rstandard(fit), geom="point") + geom_hline(yintercept=0) +
+geom_hline(yintercept=2, colour = I("red"), alpha=I(0.5)) +
+geom_hline(yintercept=-2, colour = I("red"), alpha=I(0.5))
+
+
+# check for independence via durbin
+library(car)
+durbinWatsonTest(fit)
+#p-value=0 --> The residuals are not independent.
+
+
+
+# test for outliers
+outlierTest(fit)
+
+# plot most influential variables
+influencePlot(fit)
+
+
 
 
 #Images
