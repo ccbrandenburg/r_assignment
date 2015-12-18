@@ -2,6 +2,36 @@
 title: "R Assignment"
 output: html_document
 ---
+
+Outline:
+
+Introduction to project
+- purpose
+- predictions
+- techniques to use
+
+Data exploration
+- source (mashable)
+- background (e.g. what is mashable)
+- description
+- cleaning
+- explanation of data retained
+- summary
+- initial exploration
+
+Analyses
+- articles, shares, shares/article
+- weekdays, channels
+- regressions, plots, correlations
+- validation
+
+Summary
+- techniques used
+- results
+- what was missing/failed
+- conclusion (lessons learned)
+
+
 Questions we might want to answer, just add below:
 
 Is there a relationship between topic and shares?
