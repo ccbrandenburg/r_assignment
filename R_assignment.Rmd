@@ -7,17 +7,14 @@ Outline:
 
 Introduction to project
 - purpose
-- predictions
-- techniques to use
+- data
+- goal
 
 Data exploration
-- source (mashable)
-- background (e.g. what is mashable)
-- description
-- cleaning
+- problems
+- cleaning process
 - explanation of data retained
 - summary
-- initial exploration
 
 Analyses
 - articles, shares, shares/article
@@ -30,6 +27,16 @@ Summary
 - results
 - what was missing/failed
 - conclusion (lessons learned)
+
+
+INTRODUCTION
+
+The purpose of this project was to explore a data set using R techniques learned during the course, particularly from the dplyr and ggplot2 libraries. The data set we selected contains information on nearly 40,000 articles published by Mashable over a 2-year period, detailing the day of publication, number of shares, topic of the content and keyword information. Our goal was to identify a meaningful relationship between the articles and their reach. The independent variables we focused on included day of publication and topic of the content, called the "data channel", and the number of articles. 
+
+DATA EXPLORATION
+
+
+
 
 
 Questions we might want to answer, just add below:
