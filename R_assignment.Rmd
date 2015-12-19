@@ -233,6 +233,13 @@ qplot(data=data_s,
       factor(data_channel), 
       shares)
 
+ggplot (data = data_s, aes(x=factor(data_channel), y = shares, group = as.integer(data_channel))) +
+  geom_point()+
+  coord_cartesian(,c(0,50000)) + 
+    geom_line(stat= "summary" ,fun.y = mean) 
+                          
+   
+
 #Introducing some colors
 qplot(data=data_s, 
       factor(data_channel), 
@@ -261,7 +268,7 @@ qplot(data=data_s,
 
 summary(aov(data_s$shares ~ data_s$data_channel))
 
-# The p-value is <2e-16, so with 95% confidence we can accept that there are no statistically significant differences in number of shares between the different topics.
+# The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
 
 
 # REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
