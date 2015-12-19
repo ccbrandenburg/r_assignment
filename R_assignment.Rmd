@@ -30,6 +30,15 @@ head(data)
 
 #PCA
 log.data = log
+
+library(GGally)
+theme_set(theme_minimal(20))
+
+# set the seed to make results reproducible
+set.seed(27)
+data.subset <- fb[, c(2:15)]
+ggpairs(data.subset[sample.int(nrow(fb.subset), 100), ])
+
 ```
 
 
@@ -77,6 +86,7 @@ data_s = data %>%
 
 First exploration
 ```{r}
+###
 qplot(data=data_s,
       n_tokens_title,
       geom="histogram")
@@ -136,6 +146,17 @@ data_s = data_s %>%
                         ifelse(data_channel_is_tech==1, "Tech",
                         ifelse(data_channel_is_world==1, "World",
                         ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
+
+
+library(GGally)
+theme_set(theme_minimal(20))
+
+# set the seed to make results reproducible
+set.seed(27)
+data.subset <- data_s[, c(15, 16, 28, 29, 30, 31)]
+ggpairs(data.subset[sample.int(nrow(data.subset), 500), ])
+
+present overview
 
 
 #playing around below
