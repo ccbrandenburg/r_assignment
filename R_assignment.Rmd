@@ -522,9 +522,39 @@ anova(sub6,sub7)
 
 
 
-#checking linearity
+#Checking linearity
 
 qplot( predict(sub6), resid(sub6),geom= "point") + geom_hline(yintercept = 0)
+  #there clearly seems to be a problem since there is a very clear pattern in the residuals.
+
+#Checking Normality
+
+q1= qplot(rstandard(sub6), geom="blank") + 
+  geom_histogram(aes(y=..density..), colour=I("gray")) +
+  stat_function(fun=dnorm, args=list(mean=0,sd=1), colour=I("red"), alpha=I(0.5))
+
+q2 = qplot(sample=rstandard(sub6)) + geom_abline(slope=1, intercept = 0)
+library(gridExtra)
+grid.arrange(q1,q2,nrow=1)
+    #the graphs seem to imply that we cannot go out of a normal distribution of the residuals
+
+# Checking Homoscedasticity
+qplot(predict(sub6),resid(sub6), geom= "point") + geom_hline(y_intercept = 0)
+spreadLevelPlot(sub6)
+  #This doens't look like the homoscedasticity condition can be hold, the line should normally be horizontal and we can   see a clear change of variance in the residuals along the x-axis. 
+
+# Checking Independence
+durbinWatsonTest(sub6)
+  # This test seems to be ok as the null-hypothesis of independence cannot be rejected.
+
+# Checking Multicollinearity
+vif(sub6)
+  # This test shows no Multicollinearity, since all vifs are clearly smaller than 5.
+
+# Outliers
+outlierTest(sub6)
+
+
 ```
 
 
