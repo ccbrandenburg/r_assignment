@@ -31,24 +31,11 @@ Summary
 
 INTRODUCTION
 
-The purpose of this project was to explore a data set using R techniques learned during the course, particularly from the dplyr and ggplot2 libraries. The data set we selected contains information on nearly 40,000 articles published by Mashable over a 2-year period, detailing the day of publication, number of shares, topic of the content and keyword information. Our goal was to identify a meaningful relationship between the articles and their reach. The independent variables we focused on included day of publication and topic of the content, called the "data channel", and the number of articles. 
+The purpose of this project was to explore a data set using R techniques learned during the course, particularly from the dplyr and ggplot2 libraries. The data set we selected contains information on nearly 40,000 articles published by Mashable over a 2-year period, detailing the day of publication, number of shares, topic of the content and keyword information. Our goal was to identify a meaningful relationship between the articles and their reach.
 
 DATA EXPLORATION
 
-
-
-
-
-Questions we might want to answer, just add below:
-
-Is there a relationship between topic and shares?
-If so what is the best performing topic?
-
-Weekday vs weekends
--which topics perform best when?
-
-Best performing article?
-
+The initial data set, downloaded from the University of California Irvine Machine Learning Repository (http://archive.ics.uci.edu/ml/datasets/Online+News+Popularity), had 39644 observations and 61 variables.
 
 Loading libraries
 ```{r library}
@@ -64,10 +51,11 @@ dim(data)
 tbl_df(data)
 head(data)
 
-
-#PCA
-log.data = log
 ```
+
+
+Many of the flag variables could be consolidated into one categorical variable, so we mutated them. For example, instead of a categorical variable citing which day of the week the article was published, there was a flag variable for each day of the week stating whether or not the article had been published that day. This was also the case for data_channel, which describes the topic of the article.
+
 
 
 Reducing Data:
@@ -78,15 +66,25 @@ Reducing Data:
 5. __summarize__ : Together with group_by(), used to reduce variables to values
 
 ```{r reduction}
-#reducing the dataset to relevent variables
-#feel free to add any. I would say we try to have our code mainly refer to the below dataset, fine?
 data_s = data %>%
   select(url,
-         num_keywords,
+         timedelta,
          n_tokens_title,
+         n_tokens_content,
+  # removed variables 4-6
+         num_hrefs,
+         num_self_hrefs,
          num_imgs,
          num_videos,
-         n_tokens_content, 
+         average_token_length,
+         num_keywords,
+         data_channel_is_lifestyle,
+         data_channel_is_entertainment,
+         data_channel_is_bus,
+         data_channel_is_socmed,
+         data_channel_is_tech,
+         data_channel_is_world,
+  # removed variables 19-30
          weekday_is_monday, 
          weekday_is_tuesday, 
          weekday_is_wednesday,
@@ -95,20 +93,18 @@ data_s = data %>%
          weekday_is_saturday,
          weekday_is_sunday,
          is_weekend,
+  # removed variables 39-43
+         global_subjectivity,
+         global_sentiment_polarity,
+         global_rate_positive_words,
+         global_rate_negative_words,
          rate_positive_words,
          rate_negative_words,
-         title_sentiment_polarity,
-         data_channel_is_lifestyle,
-         data_channel_is_socmed,
-         data_channel_is_tech,
-         data_channel_is_world,
-         data_channel_is_entertainment,
-         data_channel_is_bus,
+  # removed variables 50-55
          title_subjectivity,
          title_sentiment_polarity,
          abs_title_subjectivity,
          abs_title_sentiment_polarity,
-         average_token_length,
          shares)
 ```
 
@@ -117,6 +113,8 @@ First exploration
 qplot(data=data_s,
       n_tokens_title,
       geom="histogram")
+
+log.data = log
 
 qplot(data=data_s,
       rate_positive_words,
