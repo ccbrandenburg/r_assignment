@@ -182,7 +182,7 @@ p2 <- ggplot(data = data_s,
 p2 
 ```
 
-These changes helped, but it is clear that the graph would be more easily interpreted if we use a logarithmic scale instead of simply adjusting the y-limits.
+These changes helped, especially in seeing how much higher the mean shares is for Other, but it is also clear that the graph would be more easily interpreted if we use a logarithmic scale instead of simply adjusting the y-limits.
 
 ```{r channel plot3}
 p3 <- ggplot(data = data_s, 
@@ -224,7 +224,7 @@ p5
 The width of the Other category box is clearly larger, but before accounting for this difference in variances, we will establish our ANOVA hypotheses and run an initial test. We want to know with 95% confidence if there is a statistically significant difference in how many shares an article receives, depending on its data_channel. Our hypotheses are as follows:
 
 H0: There are no differences in the average number of shares for articles of different data_channels
-Ha: There ARE differences in the average number of shares for articles of different data_channels. At least two data_channels have statistically significant differences in average shares.
+Ha: There ARE differences in the average number of shares for articles of different data_channels. In other words, at least two data_channels have a statistically significant difference in average shares.
 
 ```{r anova channels}
 summary(aov(data_s$shares ~ data_s$data_channel))
@@ -302,38 +302,33 @@ q1 <- ggplot(data = data_s,
 q1 
 ```
 
+Once again, the plot makes evident our initial observations. We can see that Saturday and Sunday (days 6 and 7) have far fewer articles (#1) and that Sunday has by far the lowest max shares (#2), as well as the smallest variance (#5).
 
+Like with data_channels, we now compare the weekdays box plots to see if we can use the ANOVA test. Because the box plots without log were useless last time, we will immediately compare them using log scale.
 
-Creating box plots per weekday to see if we can use ANOVA
 ```{r weekday plot2}
-# check box plot to see if we can use ANOVA
-qplot(data=data_s, 
-      factor(weekday), 
-      shares,
-      geom="boxplot") + 
-  coord_flip()
-
-# To adjust for exponential scale, we took the logarthmic value of the # of shares
-qplot(data=data_s, 
+q2 <- qplot(data=data_s, 
       factor(weekday), 
       log(shares), 
       geom="boxplot") + 
   coord_flip()
+q2
 ```
-It's clear that variances are fairly similar each day, implying it is okay to use ANOVA. At first glance, the means appear to be similar (bearing in mind that we've taken the log), but we will verify with an ANOVA test.
 
-H0: there are no differences in the number of shares in any given day
-Ha: there ARE differences in the number of shares in any given day
+The variances appear to be fairly similar each day, even more so than with the data_channels categories. Similarly, the medians are somewhat close. Together, these two facts suggest it is okay to use ANOVA.
+
+H0: There are no differences in the average number of shares for articles published on different days of the week
+Ha: There ARE differences in the average number of shares for articles published on different days of the week. In other words, at least two days have a statistically significant difference in average shares.
 
 ```{r weekday anova}
 summary(aov(data_s$shares ~ data_s$weekday))
 ```
-The p-value is 0.314, so we do not reject H0 that there are no statistically significant differences in number of shares between the days of the week.
+The p-value is 0.314, so we do not reject the null hypothesis that the average number of shares is the same between articles published in different days of the week.
 
-Judging by the table above saturday and sundays seem to have higher means. There might be a difference in shares between weekends and weekdays? 1=Weekday, 0=Weekend
+However, our summary showed that saturday and sundays seem to have higher mean, so there might be a difference in average number of shares between weekends and weekdays. 
 
 ```{r weekday vs weekends}
-weekend_overview= data_s %>%
+weekend_overview = data_s %>%
   group_by(weekday_flag) %>%
   summarise(avg_shares=mean(shares, na.rm = TRUE), 
             median_shares=median(shares),
@@ -344,20 +339,27 @@ weekend_overview= data_s %>%
 weekend_overview
 ```
 
-Coming up with a new hypothesis.
-H0: there are no differences in the number of shares on weekdays vs weekends
-Ha: there ARE differences in the number of shares on weekdays vs weekends.
+A quick summary of weekdays (flag=1) and weekends (flag=0) shows a difference in average shares of about 600 (3903 for weekends vs 3318 for weekdays). Therefore, we create new null and alternative hypotheses:
+
+H0: There are no differences in the average number of shares for articles published during the week vs. the weekend
+Ha: There ARE differences in the average number of shares for articles published during the week vs. the weekend.
+
+Looking at a box plot comparing the two flag variables makes it easier to visualize what we plan to test.
+
 ```{r weekday plot3}
-qplot(data=data_s,
+q3 <- qplot(data=data_s,
       factor(weekday_flag),
       log(shares), 
       geom="boxplot") + 
   coord_flip()
+q3
 ```
-Visually there does not seem to be significant difference. And check what ANOVA can tell us. (can we use ANOVA here for testing differences between only two groups or should be default to t-test?????)
+
+To compare the average shares, we use a t-test.
 
 ```{r anova weekday flag}
-summary(aov(data_s$shares ~ data_s$weekday_flag))
+
+t.test(data_s$avg_shares[data_s$weekday_flag==1], data_s$avg_shares[data_s$weekday_flag==0], paired=FALSE)
 ```
 The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
