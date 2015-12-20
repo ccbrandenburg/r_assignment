@@ -308,7 +308,7 @@ q1 <- ggplot(data = data_s,
 q1  
 ```
 
-Once again, the plot makes evident our initial observations. We can see that Saturday and Sunday (days 6 and 7) have far fewer articles (#1) and that Sunday has by far the lowest max shares (#2), as well as the smallest variance (#5).
+Once again, the plot makes evident our initial observations. We can see that Saturday and Sunday (days 6 and 7) have far fewer articles (#1), but higher mean and median shares (#3-4). We also see that Sunday has by far the lowest max shares (#2), as well as the smallest variance (#5).
 
 Like with data_channels, we now compare the weekdays box plots to see if we can use the ANOVA test. Because the box plots without log were useless last time, we will immediately compare them using log scale.
 
