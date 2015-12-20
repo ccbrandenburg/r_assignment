@@ -46,6 +46,7 @@ Loading required libraries
 library(ggplot2)
 library(dplyr)
 library(GGally)
+library(car)
 ```
 
 Loading and examining the data
@@ -58,9 +59,6 @@ head(data)
 
 #PCA
 log.data = log
-
-library(GGally)
-theme_set(theme_grey(20))
 
 # set the seed to make results reproducible
 set.seed(27)
@@ -200,9 +198,6 @@ qplot(data=data_s,
       y=1, 
       size=shares, 
       scale_y_discrete(0.5,1.5))
-
-
-
 ```
 
 
@@ -213,20 +208,15 @@ qplot(data=data_s,
 
 2. anything we can put before we deepdive into channels and weekdays?
 ``` {r stuff here}
-
 #summary information
-
-
-
 library(GGally)
-theme_set(theme_minimal(20))
 
 # set the seed to make results reproducible
-set.seed(27)
-data.subset <- data_s[, c(15, 16, 28, 29, 30, 31)]
-ggpairs(data.subset[sample.int(nrow(data.subset), 500), ])
+#set.seed(27)
+#data.subset <- data_s[, c(15, 16, 28, 29, 30, 31)]
+#ggpairs(data.subset[sample.int(nrow(data.subset), 500), ])
 
-present overview
+#present overview
 
 
 #playing around below
