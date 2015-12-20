@@ -267,7 +267,7 @@ summary(aov(data_s$shares ~ data_s$data_channel))
 The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
 
 We will redo the ANOVA test without data_channel "Other" which has the largest variance
-```{r channels !=other}
+```{r channels not other}
 #REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
 noOther <- data_s %>%
   select(shares, data_channel) %>%
@@ -287,7 +287,7 @@ qplot(data=noOther,
 ```
 
 
-```{r anova channels !=other}
+```{r anova channels not other}
 summary(aov(noOther$shares ~ noOther$data_channel))
 ```
 ANOVA still has p-value < alpha which is statistically significant. We therefore reject H0.
