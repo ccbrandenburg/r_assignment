@@ -5,30 +5,20 @@ output: html_document
 
 Outline (to be deleted following completion):
 
-1. Introduction to project
-+ purpose
-+ data
-+ goal
+I. Introduction to project
+II. Data cleaning
+III. Data Exploration
+A. Channels
+B. Weekdays
+C. Sentiment
+IV. Regressions
+V. Conclusion
 
-2. Data exploration
-+ description
-+ explanation of data retained
-+ data cleaning
-
-3.Analyses
-- Summary
-- 1-D plots
-- 2-D plots
-- 3-D plots
-- Correlations
-- Regressions
-- Validation
-
-Summary
-- results
-- techniques used
-- what was missing/failed
-- conclusion (lessons learned)
+#Summary
+#- results
+#- techniques used
+#- what was missing/failed
+#- conclusion (lessons learned)
 
 
 
@@ -139,34 +129,18 @@ data_s = data_s %>%
                         ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
 ```
 
-DATA EXPLORATION
+III. DATA EXPLORATION
 
-Our initial exploration of the data was focused on summarizing and visualizing the variables individually, and then plotting shares vs. various independent variables.
-
-The following graphs are used to understand whether there are visual differences between how positive and negative words affect the number of shares. From the graphs and the correlations there does not seem to be a relationship. (Not sure if it makes sense to do this analysis at all or where in the project we could place this)
-
-```{r negative vs positive words}
-qpos = qplot(data=data_s,
-      rate_positive_words,
-      shares,
-      log="xy") +
-  geom_point(alpha=1/200)
-
-qneg = qplot(data=data_s,
-      rate_negative_words,
-      shares,
-      log="xy") +
-  geom_point(alpha=1/200)
-
-grid.arrange(qpos, qneg, nrow=1)
-
-cor(data_s$rate_positive_words, data_s$shares)
-
-cor(data_s$rate_negative_words, data_s$shares)
-```
+Our exploration of the data was split into three main areas of focus: Channels (topic of articles), Weekdays (day of publication), and Sentiment Analysis (positive-vs-negative). For each, we summarized and visualized the variables and plotted against shares.
 
 CHANNEL ANALYSIS
-The following section will investigate our data at the channel level in order to see whether there are channels/topics that stand out.
+The data_channel variable is categorical with 7 levels: Entertainment, Business, Social Media, Tech, World, Lifestyle and Other. 
+
+A summary of the data_channel categories provides a good place to start. The following pieces of information stood out to us:
+- There are far fewer articles about Lifestyle (2099) or Social Media (2323) than the other 5 categories, each of which had between 6134 (Other) and 8427 (World)
+- The Other category has a much higher average number of shares (5945) than any other category (between 2287 and 3682)
+- The Other (19393) and Business (15046) categories have much higher standard deviation of shares than the others (between 5524 and 9024)
+- Max shares is much larger for Business (690400), Tech (663600) and Other (843300) than the others (between 122800 and 284700)
 
 Basic statistical overview of shares per channel:
 ```{r cat overview}
@@ -188,15 +162,19 @@ qplot(data=data_s,
       shares)
 ```
 
+# Test merge 
+
 ```{r channel plot2}
 ggplot(data = data_s, 
         aes(x=factor(data_channel), 
             y = shares, 
             group = as.integer(data_channel))) +
-  geom_point()+
+  geom_jitter(alpha=0.15)+
   coord_cartesian(,c(0,50000)) + 
     geom_line(stat= "summary" ,
-              fun.y = mean) 
+              fun.y = mean, color=I("blue")) + 
+    geom_line(stat= "summary" ,
+              fun.y = median, color=I("red")) 
 ```
 
 ```{r channel plot3}
@@ -356,7 +334,34 @@ anova(data_s$data_channel, data_s$shares)
 ```
 The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
-5. Regression Analysis:
+
+5. OTHER ANALYSES
+
+The following graphs are used to understand whether there are visual differences between how positive and negative words affect the number of shares. From the graphs and the correlations there does not seem to be a relationship.
+
+```{r negative vs positive words}
+qpos = qplot(data=data_s,
+      rate_positive_words,
+      shares,
+      log="xy") +
+  geom_point(alpha=1/200)
+
+qneg = qplot(data=data_s,
+      rate_negative_words,
+      shares,
+      log="xy") +
+  geom_point(alpha=1/200)
+
+grid.arrange(qpos, qneg, nrow=1)
+
+cor(data_s$rate_positive_words, data_s$shares)
+
+cor(data_s$rate_negative_words, data_s$shares)
+```
+
+
+
+6. Regression Analysis:
 ```{r messing around}
 summary(data_s)
 
