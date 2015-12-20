@@ -398,15 +398,10 @@ We notice that there's no substantial difference between shares with articles th
 
 IV. REGRESSION ANALYSIS:
 
-```{r messing around}
-summary(data_s)
+Initially, we set out to build a linear regression model that could predict the number of shares an article would have, given certain independent variables. However, while trying to identify the variables with the strongest correlation, our matrix showed that there was no variable with a correlation to shares greater than 0.04 (num_imgs).
 
-#plotting images
-ggplot(aes(y=shares, x=num_imgs), data=data_s) + 
-  geom_point(alpha=1/20) +
-  ylim(0, quantile(data_s$shares, probs=0.95)) +
-  geom_smooth(method="lm", color="red")
-```
+Therefore, we shifted our focus to building a linear model around abs_title_sentiment_polarity, which represents to what extend the title has a certain sentiment or how it is not neutral. 
+We chose this as the dependent variable because it was the only one for which we could find independent variables that correlated, and thus offered the most interesting opportunity to make a statistically significant regression model. While there are other models that would be more intuitive, we chose this model because the intent of this project was to showcase the techniques while the more intuitive models were all not significant.
 
 We will first create a new dataset to work with
 ```{r regression data}
@@ -428,48 +423,67 @@ data_R = data_s %>%
          shares,
          weekday)
 ```
-Checking correlations between the variables and shares.
+
+Correlation matrix:
 ```{r cor check}
 cor(data_R [,unlist(lapply(data_R, is.numeric))])
 ```
-It becomes clear that the variables individually do not have a big impact on the amount of shares of articles. We will therefore check different models and see whether we can find a relationship between different variables in combination and shares.
+
+Based on the correlation matrix, we chose abs_title_sentiment_polarity as our target variable and we will consider title_sentiment_polarity, title_subjectivity and abs_title_subjectivity as independent variables. In developping the lineair regression model we will evaluate these independent variables.
+
+First we tried a standard linear regression model incorporating all 3 independent variables.
 
 ```{r r sub}
 sub <- lm(data= data_R, abs_title_sentiment_polarity ~ title_sentiment_polarity + title_subjectivity + abs_title_subjectivity) 
 summary(sub)
 ```
 
+According to the summary, the model as a whole has p-value lower than .05 (it is 2.2e-16 here), and each variable also has p-value lower than .05, so we can accept the model as is. However, with an R^2 of 0.57, we think we can do better, so we added complexity.
+
+In this second model, we introduce interaction.
 ```{r r sub1}
 sub1 <- lm(data= data_R, abs_title_sentiment_polarity ~ (title_sentiment_polarity + title_subjectivity + abs_title_subjectivity)^ 2)
 summary(sub1)
 ```
 
+Once again, all p-values are below 0.05 so we can accept the model. However, this time the R^2 is 0.62, so it's a "better" model. To test whether there is a statistically significant difference between the 2 models, we use an ANOVA test.
+
 ```{r r sub 1 comparison}
 anova(sub,sub1)
 ```
-sub1 is so far the more superior model.
 
-We will now introduce interaction between variables
+Once again, p-value is below 0.05, so we reject that there is no difference between models. Sub1 is the more superior model.
+
+We will now introduce interaction between variables.
 ```{r r sub2}
 sub2 <- lm(data= data_R, abs_title_sentiment_polarity ~ title_sentiment_polarity + (title_subjectivity + abs_title_subjectivity)^2)
 summary(sub2)
 ```
+
+Running the same tests, sub2 is acceptable, but since the R^2 (0.58) is lower than that of sub1 (0.618), we stay with sub1.
 
 ```{r r sub3}
 sub3 <- lm(data= data_R, abs_title_sentiment_polarity ~ (title_sentiment_polarity + title_subjectivity)^2 + abs_title_subjectivity)
 summary(sub3)
 ```
 
+Sub3 is similar to sub1, but has a very slightly lower R^2 (0.615 compared so sub1's R^2 of 0.618), so we keep sub1.
+
 ```{r r sub4}
 sub4 <- lm(data= data_R, abs_title_sentiment_polarity ~ title_subjectivity + (title_sentiment_polarity + abs_title_subjectivity)^2)
 summary(sub4)
 ```
+
+Again, sub4 is similar to sub1, but has a lower R^2 (0.59 compared so sub1's R^2 of 0.618), so we still keep sub1.
 
 Introducing polynomial regression models
 ```{r r sub5}
 sub5 <- lm(data= data_R, abs_title_sentiment_polarity ~ ( I(title_sentiment_polarity^2) + I(title_subjectivity^2) + I(abs_title_subjectivity^2)))
 summary(sub5)
 ```
+
+Once we make the model polynomial, the R^2 value jumps to 0.934, and the p-values are all below 0.05, so this is our optimal model this fur. To compare 
+
 Checking which whether sub5 is better than the previous models.
 ```{r anova sub 5}
 anova(sub1,sub5)
@@ -551,7 +565,7 @@ Checking Multicollinearity
 ```{r multicol}
 vif(sub6)
 ```
-This test shows no Multicollinearity, since all vifs are clearly smaller than 5.
+Here we had our concerns since our independent variables seem quite similar in their description. Nevertheless, this test shows no Multicollinearity, since all vifs are clearly smaller than 5.
 
 Checking Outliers
 ```{r outliers}
@@ -559,9 +573,12 @@ outlierTest(sub6)
 ```
 
 V. CONCLUSION
+After completing this project, we've learned how to conduct a stastical analysis on a dataset using the following tools: 
+- T-Test. 
+_ Anova. 
+- Regression Analysis. 
 
-
-
+We also used ggplot as a graphic library to visualize the data and draw insights and perform exploratory analysis, we also used dplyr to clean and mutate the dataset we have before starting the analysis.  
 
 
 
