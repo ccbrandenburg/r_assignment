@@ -131,7 +131,7 @@ data_s = data_s %>%
 
 III. DATA EXPLORATION
 
-Our exploration of the data was split into three main areas of focus: Channels (topic of articles), Weekdays (day of publication), and Sentiment Analysis (positive-vs-negative). For each, we summarized and visualized the variables and plotted against shares.
+Our exploration of the data was split into three main areas of focus, which we thought would most likely influence the number of times an article was shared: Channels (topic of articles), Weekdays (day of publication), and Sentiment Analysis (positive-vs-negative). For each, we summarized and visualized the variables and plotted against shares.
 
 A. CHANNEL ANALYSIS
 
@@ -358,26 +358,13 @@ q3
 To compare the average shares, we use a t-test.
 
 ```{r anova weekday flag}
-
-t.test(data_s$avg_shares[data_s$weekday_flag==1], data_s$avg_shares[data_s$weekday_flag==0], paired=FALSE)
+with(data=data_s, t.test(shares[weekday_flag==1], shares[weekday_flag==0]))
+#t.test(data_s$avg_shares[data_s$weekday_flag==1], data_s$avg_shares[data_s$weekday_flag==0], paired=TRUE)
 ```
-The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
-
-Question: Which article was shared the most?
-```{r}
-#Article with the highest number of shares
-data_s$url[which.max(data_s$shares)]
-max(data_s$shares)
-```
-
-Question: Mean shares per group
-```{r}
-summary(aov(data_s$shares ~ data_s$data_channel))
-```
-The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
+The p-value is < 0.05 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
 
-5. OTHER ANALYSES
+C. SENTIMENT ANALYSIS
 
 The following graphs are used to understand whether there are visual differences between how positive and negative words affect the number of shares. From the graphs and the correlations there does not seem to be a relationship.
 
@@ -403,7 +390,8 @@ cor(data_s$rate_negative_words, data_s$shares)
 
 
 
-6. Regression Analysis:
+IV. REGRESSION ANALYSIS:
+
 ```{r messing around}
 summary(data_s)
 
@@ -414,7 +402,6 @@ ggplot(aes(y=shares, x=num_imgs), data=data_s) +
   geom_smooth(method="lm", color="red")
 ```
 
-REGRESSION ANALYSIS
 We will first create a new dataset to work with
 ```{r regression data}
 data_R = data_s %>%
@@ -564,6 +551,25 @@ Checking Outliers
 ```{r outliers}
 outlierTest(sub6)
 ```
+
+V. CONCLUSION
+
+
+
+
+
+
+
+
+
+++ FOR FUN
+
+Question: Which article was shared the most?
+```{r}
+#Article with the highest number of shares
+data_s$url[which.max(data_s$shares)]
+```
+
 
 
 
