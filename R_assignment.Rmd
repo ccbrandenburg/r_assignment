@@ -47,6 +47,7 @@ library(ggplot2)
 library(dplyr)
 library(GGally)
 library(car)
+library(gridExtra)
 ```
 
 Loading and examining the data
@@ -61,9 +62,9 @@ head(data)
 log.data = log
 
 # set the seed to make results reproducible
-set.seed(27)
-data.subset <- data[, c(2:15)]
-ggpairs(data.subset[sample.int(nrow(data.subset), 100), ])
+#set.seed(27)
+#data.subset <- data[, c(2:15)]
+#ggpairs(data.subset[sample.int(nrow(data.subset), 100), ])
 ```
 
 To start, we selected only those columns that we believed had a higher probability of correlating positively with increased shares, such as type of content (images, links, videos), length of content (word count in title or article body), day of week published, topic of article, subjectivity and sentiment analysis information. The variables we removed either had unclear descriptions, were deemed redundant given other variables provided, or were not interesting enough to pursue in our analysis.
@@ -109,7 +110,6 @@ data_s = data %>%
          abs_title_subjectivity,
          abs_title_sentiment_polarity,
          shares)
-head(data_s)
 ```
 
 To make the data easier to manage, we mutated the flag variables that could be easily consolidated into one categorical variable. For example, instead of a categorical variable citing which day of the week the article was published, the original data set had a flag variable for each day of the week stating whether or not the article had been published that day. This was also the case for data_channel, which describes the topic of the article.
@@ -134,9 +134,6 @@ data_s = data_s %>%
                         ifelse(data_channel_is_tech==1, "Tech",
                         ifelse(data_channel_is_world==1, "World",
                         ifelse(data_channel_is_lifestyle==1, "Lifestyle", "Other")))))))
-
-summary(data_s)
-
 ```
 
 DATA EXPLORATION
@@ -144,39 +141,29 @@ DATA EXPLORATION
 Our initial exploration of the data was focused on summarizing and visualizing the variables individually, and then plotting shares vs. various independent variables.
 
 
+@Lionel and @Iyad, I think we can delete the following chunk. I took out the visualisation of positive keywords and added negative plus two correlations in the chunk below. 
 ```{r}
 # should we go in order here:
 # 1. summarize the statistics & point out interesting tidbits
 # 2. plot individual variables
 # 3. plot individual variables vs. shares
 
+#plotting timedelta on a histogram
 qplot(data=data_s, 
       timedelta, 
       geom="histogram") +
   theme_grey()
 
+
+#plotting n_tokens_title on a histogram
 qplot(data=data_s,
       n_tokens_title,
       geom="histogram") +
   theme_grey()
 
+#what are we doing here?
 log.data = log
 
-qplot(data=data_s,
-      rate_positive_words,
-      shares,
-      log="xy") +
-  geom_point(alpha=1/200)
-
-ggplot (aes(x=rate_positive_words, 
-            y=shares), 
-        data=data_s, 
-        log="xy") +
-    geom_point(alpha=1/20) +
-    xlim(13,90)
-
-cor(data_s$rate_positive_words, data_s$shares)
-  
 qplot(data=data_s,
       title_sentiment_polarity,
       geom="histogram")   
@@ -190,57 +177,32 @@ summary(data_s$shares)
 
 ```
 
-Trying out some stuff with graphs and overviews of weekday/categories
-```{r}
+The following graphs are used to understand whether there are visual differences between how positive and negative words affect the number of shares. From the graphs and the correlations there does not seem to be a relationship. (Not sure if it makes sense to do this analysis at all or where in the project we could place this)
+```{r negative vs positive words}
+qpos = qplot(data=data_s,
+      rate_positive_words,
+      shares,
+      log="xy") +
+  geom_point(alpha=1/200)
 
-qplot(data=data_s, 
-      x=factor(data_channel), 
-      y=1, 
-      size=shares, 
-      scale_y_discrete(0.5,1.5))
+qneg = qplot(data=data_s,
+      rate_negative_words,
+      shares,
+      log="xy") +
+  geom_point(alpha=1/200)
+
+grid.arrange(qpos, qneg, nrow=1)
+
+cor(data_s$rate_positive_words, data_s$shares)
+
+cor(data_s$rate_negative_words, data_s$shares)
 ```
 
+CHANNEL ANALYSIS
+The following section will investigate our data at the channel level in order to see whether there are channels/topics that stand out.
 
-
-
-
-
-
-2. anything we can put before we deepdive into channels and weekdays?
-``` {r stuff here}
-#summary information
-library(GGally)
-
-# set the seed to make results reproducible
-#set.seed(27)
-#data.subset <- data_s[, c(15, 16, 28, 29, 30, 31)]
-#ggpairs(data.subset[sample.int(nrow(data.subset), 500), ])
-
-#present overview
-
-
-#playing around below
-#number of articles per section
-qplot(data=data_s,
-      aes(x=reorder(data_channel,data_channel, function(x)-length(x))))+ geom_bar()
-
-
-ggplot(theTable,
-       aes(x=reorder(Position,Position,
-                     function(x)-length(x)))) +
-       geom_bar()
-#trying to reorder things
-ggplot(data_s, aes(x=reorder(data_channel, shares), y=shares, fill=reorder(data_channel, shares))) + geom_bar(stat=) + theme(axis.text.x=element_text(angle=45, vjust=0.5))
-
-
-sum(data_s$weekday_flag)              
-sum(data_s$weekday)
-
-```
-
-3. Looking at data at the channel level
-``` {r channels}
-#Avg Shares and articles published by category  <-- added this here as an overview
+Basic statistical overview of shares per channel:
+```{r cat overview}
 category_overview= data_s %>%
   group_by(data_channel) %>%
   summarise(avg_shares=mean(shares, na.rm = TRUE), 
@@ -249,25 +211,37 @@ category_overview= data_s %>%
             min_shares=min(shares),
             sd_shares=sd(shares),
             article_count=length(shares))
+category_overview
+```
 
+The following section tries to provide a visual overview of how shares are distributed across channels.
+```{r channel plot1}
 qplot(data=data_s,
       factor(data_channel), 
       shares)
+```
 
-ggplot (data = data_s, aes(x=factor(data_channel), y = shares, group = as.integer(data_channel))) +
+```{r channel plot2}
+ggplot(data = data_s, 
+        aes(x=factor(data_channel), 
+            y = shares, 
+            group = as.integer(data_channel))) +
   geom_point()+
   coord_cartesian(,c(0,50000)) + 
-    geom_line(stat= "summary" ,fun.y = mean) 
-                          
-   
+    geom_line(stat= "summary" ,
+              fun.y = mean) 
+```
 
+```{r channel plot3}
 #Introducing some colors
 qplot(data=data_s, 
       factor(data_channel), 
       log(shares), 
       position="jitter", 
       colour=data_channel)
+```
 
+```{r channel plot4}
 # check box plot to see if we can use ANOVA
 qplot(data=data_s, 
       factor(data_channel), 
@@ -281,43 +255,49 @@ qplot(data=data_s,
       log(shares),
       geom="boxplot") + 
   coord_flip()
+```
 
-# COMMENT ABOUT POSSIBLE DIFFERENCES IN VARIANCES
 
-# H0 is that there are no differences in the number of shares between data_channels (topics)
-# Ha is that there ARE differences in the number of shares between data_channels (topics)
-
+Possible differences in variances
+H0: there are no differences in the number of shares between data_channels (topics)
+Ha: there ARE differences in the number of shares between data_channels (topics)
+```{r anova channels}
 summary(aov(data_s$shares ~ data_s$data_channel))
+```
+The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
 
-# The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
-
-
-# REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
-
+We will redo the ANOVA test without data_channel "Other" which has the largest variance
+```{r channels !=other}
+#REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
 noOther <- data_s %>%
   select(shares, data_channel) %>%
   filter(data_channel!="Other")
 
+#verify the filter
 count(noOther)/count(data_s)
-
-qplot(data=noOther, factor(data_channel), log(shares), geom="boxplot") + coord_flip()
-# now they look good enough
-
-summary(aov(noOther$shares ~ noOther$data_channel))
-
-# anova still has p-value < alpha ---->>>>>>> statistically significant. Reject H0
-
-
-# NEXT FIND THE BEST TOPIC FOR SHARING / OR / RANK THE TOPICS
 ```
 
-4. Looking at data at the weekday level
-``` {r weekday analysis}
-# check box plot to see if we can use ANOVA --- WTF IS THIS? Still what is this??
-qplot(data=data_s, factor(weekday), shares, geom="boxplot") + coord_flip() + scale_y_discrete(breaks=0:2000)
+Create a new boxplot
+```{r channel plot 5}
+qplot(data=noOther, 
+      factor(data_channel), 
+      log(shares), 
+      geom="boxplot") + 
+  coord_flip()
+```
 
-#Avg Shares and articles published by weekday <-- added this here as an overview
-weekday_overview= data_s %>%
+
+```{r anova channels !=other}
+summary(aov(noOther$shares ~ noOther$data_channel))
+```
+ANOVA still has p-value < alpha which is statistically significant. We therefore reject H0.
+
+WEEKDAY ANALYSIS
+4. Looking at data at the weekday level
+
+Basic statistical overview of shares per weekday:
+```{r weekday overview}
+weekday_overview = data_s %>%
   group_by(weekday) %>%
   summarise(avg_shares=mean(shares, na.rm = TRUE), 
             median_shares=median(shares),
@@ -325,20 +305,26 @@ weekday_overview= data_s %>%
             min_shares=min(shares),
             sd_shares=sd(shares),
             article_count=length(shares))
+weekday_overview
+```
 
-#Plotting the all articles' shares per weekday
+Plotting how number of shares are distributed across weekdays.
+```{r weekday plot1}
 qplot(data=data_s, 
       factor(weekday),
       log(shares), 
       position="jitter", 
       colour=factor(weekday),
-      main="Article shares per Weekday")
-  
-
+      main="Article shares per Weekday",
+      xlab="Weekday",
+      ylab="Log of Shares")
+```
+Creating box plots per weekday to see if we can use ANOVA
+```{r weekday plot2}
 # check box plot to see if we can use ANOVA
 qplot(data=data_s, 
       factor(weekday), 
-      shares, 
+      shares,
       geom="boxplot") + 
   coord_flip()
 
@@ -348,16 +334,20 @@ qplot(data=data_s,
       log(shares), 
       geom="boxplot") + 
   coord_flip()
-# It's clear that variances are fairly similar each day, implying it is okay to use ANOVA. At first glance, the means appear to be similar (bearing in mind that we've taken the log), but we will verify with an ANOVA test
+```
+It's clear that variances are fairly similar each day, implying it is okay to use ANOVA. At first glance, the means appear to be similar (bearing in mind that we've taken the log), but we will verify with an ANOVA test.
 
-# H0: there are no differences in the number of shares in any given day
-# Ha: there ARE differences in the number of shares in any given day
+H0: there are no differences in the number of shares in any given day
+Ha: there ARE differences in the number of shares in any given day
+
+```{r weekday anova}
 summary(aov(data_s$shares ~ data_s$weekday))
+```
+The p-value is 0.314, so we do not reject H0 that there are no statistically significant differences in number of shares between the days of the week.
 
-# The p-value is 0.314, so we do not reject H0 that there are no statistically significant differences in number of shares between the days of the week.
-## if p< 5% (significance level) ->reject
+Judging by the table above saturday and sundays seem to have higher means. There might be a difference in shares between weekends and weekdays? 1=Weekday, 0=Weekend
 
-# Judging by the table above saturday and sundays seem to have higher means. There might be a difference in shares between weekends and weekdays? 
+```{r weekday vs weekends}
 weekend_overview= data_s %>%
   group_by(weekday_flag) %>%
   summarise(avg_shares=mean(shares, na.rm = TRUE), 
@@ -366,20 +356,25 @@ weekend_overview= data_s %>%
             min_shares=min(shares),
             sd_shares=sd(shares),
             article_count=length(shares))
+weekend_overview
+```
 
-# H0: there are no differences in the number of shares on weekdays vs weekends
-# Ha: there ARE differences in the number of shares on weekdays vs weekends.
-
+Coming up with a new hypothesis.
+H0: there are no differences in the number of shares on weekdays vs weekends
+Ha: there ARE differences in the number of shares on weekdays vs weekends.
+```{r weekday plot3}
 qplot(data=data_s,
       factor(weekday_flag),
       log(shares), 
       geom="boxplot") + 
   coord_flip()
-#visually there does not seem to be a significant difference
-
-summary(aov(data_s$shares ~ data_s$weekday_flag))
-#The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 ```
+Visually there does not seem to be significant difference. And check what ANOVA can tell us. (can we use ANOVA here for testing differences between only two groups or should be default to t-test?????)
+
+```{r anova weekday flag}
+summary(aov(data_s$shares ~ data_s$weekday_flag))
+```
+The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
 Question: Which article was shared the most?
 ```{r}
