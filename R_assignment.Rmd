@@ -34,12 +34,7 @@ Summary
 
 INTRODUCTION
 
-The purpose of this project was to explore a data set using R techniques learned during the course, particularly from the dplyr and ggplot2 libraries. The data set we selected contains information on nearly 40,000 articles published by Mashable over a 2-year period, detailing the day of publication, number of shares, topic of the content and keyword information. Our goal was to identify a meaningful relationship between the articles and their reach (as measured in shares).
-
-
-DATA CLEANING
-
-The initial data set, downloaded from the University of California Irvine Machine Learning Repository (http://archive.ics.uci.edu/ml/datasets/Online+News+Popularity), had 39644 observations and 61 variables.
+The purpose of this project was to explore a data set using R techniques learned during the course, particularly from the dplyr and ggplot2 libraries. The data set we selected contains information on nearly 40,000 articles published by Mashable over a 2-year period, detailing the day of publication, number of shares, topic of the content and keyword information. Our goal was to identify a meaningful relationship between the articles and their reach (as measured in shares), with the help of the below libraries.
 
 Loading required libraries
 ```{r library}
@@ -50,24 +45,32 @@ library(car)
 library(gridExtra)
 ```
 
+DATA CLEANING
+
+The initial data set, downloaded from the University of California Irvine Machine Learning Repository (http://archive.ics.uci.edu/ml/datasets/Online+News+Popularity), had 39644 observations and 61 variables.
+
 Loading and examining the data
 ```{r load data and examine}
 data=read.csv("OnlineNewsPopularity.csv", stringsAsFactors = FALSE)
-glimpse(data)
 dim(data)
+glimpse(data)
 tbl_df(data)
 head(data)
+tail(data)
+summary(data)
 
 #PCA
 log.data = log
 
-# set the seed to make results reproducible
-#set.seed(27)
-#data.subset <- data[, c(2:15)]
-#ggpairs(data.subset[sample.int(nrow(data.subset), 100), ])
+# Set the seed to make results reproducible
+set.seed(27)
+data.subset <- data[, c(2:15)]
+ggpairs(data.subset[sample.int(nrow(data.subset), 1000), ])
 ```
 
-To start, we selected only those columns that we believed had a higher probability of correlating positively with increased shares, such as type of content (images, links, videos), length of content (word count in title or article body), day of week published, topic of article, subjectivity and sentiment analysis information. The variables we removed either had unclear descriptions, were deemed redundant given other variables provided, or were not interesting enough to pursue in our analysis.
+We selected only those columns that we believed had a higher probability of correlating positively with increased shares. Our decisions were based on the explanations provided for each variable, the descriptive and summary information calculated and the ggpairs plot. The variables we removed either had unclear descriptions, were deemed redundant given other variables provided, or were not interesting enough to pursue in our analysis.
+
+Our final variables, listed below, included type of content (images, links, videos), length of content (word count in title or article body), day of week published, topic of article, subjectivity and sentiment analysis information. 
 
 ```{r variable-reduction}
 data_s = data %>%
@@ -112,9 +115,9 @@ data_s = data %>%
          shares)
 ```
 
-To make the data easier to manage, we mutated the flag variables that could be easily consolidated into one categorical variable. For example, instead of a categorical variable citing which day of the week the article was published, the original data set had a flag variable for each day of the week stating whether or not the article had been published that day. This was also the case for data_channel, which describes the topic of the article.
+To make the data easier to manage, we consolidated several similar flag variables into one categorical variable. For example, instead of a categorical variable citing which day of the week the article was published, the original data set had a flag variable for each day of the week stating whether or not the article had been published that day. This was also the case for data_channel, which describes the topic of the article.
 
-There existed a flag variable called "is_weekend" that marks articles that were published on the weekend. We wanted to explore this, but the definition of weekend was not included. Rather than assume this meant Saturday and Sunday, we created our own flag variable called weekday, which represented any articles published Monday through Friday.
+There already existed a flag variable called "is_weekend" that marks articles that were published on the weekend. We wanted to explore this, but the definition of weekend was not included. Rather than assume this meant Saturday and Sunday, we created our own flag variable called weekday, which represented any articles published Monday through Friday.
 
 ```{r mutating-variables}
 data_s = data_s %>%
@@ -140,44 +143,8 @@ DATA EXPLORATION
 
 Our initial exploration of the data was focused on summarizing and visualizing the variables individually, and then plotting shares vs. various independent variables.
 
-
-@Lionel and @Iyad, I think we can delete the following chunk. I took out the visualisation of positive keywords and added negative plus two correlations in the chunk below. 
-```{r}
-# should we go in order here:
-# 1. summarize the statistics & point out interesting tidbits
-# 2. plot individual variables
-# 3. plot individual variables vs. shares
-
-#plotting timedelta on a histogram
-qplot(data=data_s, 
-      timedelta, 
-      geom="histogram") +
-  theme_grey()
-
-
-#plotting n_tokens_title on a histogram
-qplot(data=data_s,
-      n_tokens_title,
-      geom="histogram") +
-  theme_grey()
-
-#what are we doing here?
-log.data = log
-
-qplot(data=data_s,
-      title_sentiment_polarity,
-      geom="histogram")   
-
-qplot(data=data_s,
-      title_sentiment_polarity,
-      shares)
-
-summary(data_s$shares)
-
-
-```
-
 The following graphs are used to understand whether there are visual differences between how positive and negative words affect the number of shares. From the graphs and the correlations there does not seem to be a relationship. (Not sure if it makes sense to do this analysis at all or where in the project we could place this)
+
 ```{r negative vs positive words}
 qpos = qplot(data=data_s,
       rate_positive_words,
