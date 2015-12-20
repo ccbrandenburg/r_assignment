@@ -1,5 +1,9 @@
 ---
 title: "R Assignment"
+Prepared By: 1- Lionel Johnnes
+             2- Jonas Beullens
+             3- Chris Brandenberg
+             4- Iyad Al Aqel
 output: html_document
 ---
 
