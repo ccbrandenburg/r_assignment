@@ -130,17 +130,14 @@ data_s = data_s %>%
 ```
 
 III. DATA EXPLORATION
+=======
+DATA EXPLORATION
 
 Our exploration of the data was split into three main areas of focus: Channels (topic of articles), Weekdays (day of publication), and Sentiment Analysis (positive-vs-negative). For each, we summarized and visualized the variables and plotted against shares.
 
 CHANNEL ANALYSIS
-The data_channel variable is categorical with 7 levels: Entertainment, Business, Social Media, Tech, World, Lifestyle and Other. 
-
-A summary of the data_channel categories provides a good place to start. The following pieces of information stood out to us:
-- There are far fewer articles about Lifestyle (2099) or Social Media (2323) than the other 5 categories, each of which had between 6134 (Other) and 8427 (World)
-- The Other category has a much higher average number of shares (5945) than any other category (between 2287 and 3682)
-- The Other (19393) and Business (15046) categories have much higher standard deviation of shares than the others (between 5524 and 9024)
-- Max shares is much larger for Business (690400), Tech (663600) and Other (843300) than the others (between 122800 and 284700)
+The data_channel variable is categorical with 7 levels: Entertainment, Business, Social Media, Tech, World, Lifestyle and Other.
+A summary of the data_channel categories provided a good place to start.
 
 Basic statistical overview of shares per channel:
 ```{r cat overview}
@@ -155,17 +152,25 @@ category_overview= data_s %>%
 category_overview
 ```
 
+The following pieces of information stood out to us:
+1. There are far fewer articles about Lifestyle (2099) or Social Media (2323) than the other 5 categories, each of which had between 6134 (Other) and 8427 (World)
+2. Max shares is much larger for Business (690400), Tech (663600) and Other (843300) than the others (between 122800 and 284700)
+3. Median shares varies among categories more so than the other summary statistics, with a high of 2100 (Social Media) a d low of 1100 (World) and the other 5 spread between the two extremes.
+4. The Other category has a much higher average number of shares (5945) than any other category (between 2287 and 3682)
+5. The Other (19393) and Business (15046) categories have much higher standard deviation of shares than the others (between 5524 and 9024)
+
+To explore these observations, we took to plotting the channel data, adding complexity with each progressive graph.
+
 The following section tries to provide a visual overview of how shares are distributed across channels.
 ```{r channel plot1}
-qplot(data=data_s,
-      factor(data_channel), 
-      shares)
+p1 <- ggplot(data_s , aes(factor(data_channel), shares)) + geom_jitter()
+p1
 ```
 
-# Test merge 
+This initial plot is extremely difficult to read, so we made a few adjustments to scale and colors, focusing on the majority of the data points and adding lines representing the mean (blue) and median (red) number of shares.
 
 ```{r channel plot2}
-ggplot(data = data_s, 
+p2 <- ggplot(data = data_s, 
         aes(x=factor(data_channel), 
             y = shares, 
             group = as.integer(data_channel))) +
@@ -175,52 +180,73 @@ ggplot(data = data_s,
               fun.y = mean, color=I("blue")) + 
     geom_line(stat= "summary" ,
               fun.y = median, color=I("red")) 
+p2 
 ```
 
+These changes helped, but it is clear that the graph would be more easily interpreted if we use a logarithmic scale instead of simply adjusting the y-limits.
+
 ```{r channel plot3}
-#Introducing some colors
-qplot(data=data_s, 
-      factor(data_channel), 
-      log(shares), 
-      position="jitter", 
-      colour=data_channel)
+p3 <- ggplot(data = data_s, 
+        aes(x=factor(data_channel), 
+            y = log(shares), 
+            group = as.integer(data_channel))) +
+  geom_jitter(alpha=0.15)+
+    geom_line(stat= "summary" ,
+              fun.y = mean, color=I("blue")) + 
+    geom_line(stat= "summary" ,
+              fun.y = median, color=I("red")) 
+p3
 ```
+
+The logarithmic version is much more helpful, as we can now see some of the observations represented in the summary. For example, we can see that Lifestyle and Social Media have fewer articles (#1), max shares is larger for Business, Tech and Other (#2), and the differences in Median and Mean (#3-4) across articles. The Other category clearly stands out as different, in part because of its larger variance (#5).
+
+Before running an ANOVA test, we compared boxplots of the data to compare the variance and see if ANOVA would be a valid method to use.
 
 ```{r channel plot4}
 # check box plot to see if we can use ANOVA
-qplot(data=data_s, 
+p4 <- qplot(data=data_s, 
       factor(data_channel), 
       shares, 
       geom="boxplot") + 
   coord_flip()
+p4
+```
 
+Without a log scale, the box plots were useless, but with log scale, we can clearly see the ranges, medians and interquartile widths of each category.
+
+``` {r channel plot5}
 # To adjust for exponential scale, we took the logarthmic value of the # of shares
-qplot(data=data_s, 
+p5<- qplot(data=data_s, 
       factor(data_channel), 
       log(shares),
       geom="boxplot") + 
   coord_flip()
+p5
 ```
 
+The width of the Other category box is clearly larger, but before accounting for this difference in variances, we will establish our ANOVA hypotheses and run an initial test. We want to know with 95% confidence if there is a statistically significant difference in how many shares an article receives, depending on its data_channel. Our hypotheses are as follows:
 
-Possible differences in variances
-H0: there are no differences in the number of shares between data_channels (topics)
-Ha: there ARE differences in the number of shares between data_channels (topics)
+H0: There are no differences in the average number of shares for articles of different data_channels
+Ha: There ARE differences in the average number of shares for articles of different data_channels. At least two data_channels have statistically significant differences in average shares.
+
 ```{r anova channels}
 summary(aov(data_s$shares ~ data_s$data_channel))
 ```
-The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
 
-We will redo the ANOVA test without data_channel "Other" which has the largest variance
-```{r channels not other}
-#REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
+Including all categories, the p-value is <2e-16, so with 95% confidence we can accept that there are at least two data_channels with a statistically significant difference in average number of shares. Because of the suspicious variance in the Other category, and the fact that Other is not a well-defined category, we redid the test removing Other articles.
+
+To start, we filtered the data_s data set for all categories not equal to Other and confirmed this still represented a large portion of the data.
+
+```{r channels is not equal other}
 noOther <- data_s %>%
   select(shares, data_channel) %>%
   filter(data_channel!="Other")
 
-#verify the filter
+#verify the filter works
 count(noOther)/count(data_s)
 ```
+
+85% of the data remained, so we repeating the box plots with the new noOther data set.
 
 Create a new boxplot
 ```{r channel plot 5}
@@ -231,11 +257,13 @@ qplot(data=noOther,
   coord_flip()
 ```
 
+This looks much better, with more similar variances.
 
 ```{r anova channels not other}
 summary(aov(noOther$shares ~ noOther$data_channel))
 ```
-ANOVA still has p-value < alpha which is statistically significant. We therefore reject H0.
+ANOVA still has p-value < alpha which is statistically significant. We therefore reject the null hypothesis that there are no differences in the average number of shares for articles of different data_channels. We are confident we can include this in our regression model.
+
 
 WEEKDAY ANALYSIS
 4. Looking at data at the weekday level
@@ -330,7 +358,7 @@ max(data_s$shares)
 
 Question: Mean shares per group
 ```{r}
-anova(data_s$data_channel, data_s$shares)
+summary(aov(data_s$shares ~ data_s$data_channel))
 ```
 The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
