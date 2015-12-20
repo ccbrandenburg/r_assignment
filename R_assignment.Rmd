@@ -22,7 +22,7 @@ V. Conclusion
 
 
 
-INTRODUCTION
+I. INTRODUCTION
 
 The purpose of this project was to explore a data set using R techniques learned during the course, particularly from the dplyr and ggplot2 libraries. The data set we selected contains information on nearly 40,000 articles published by Mashable over a 2-year period, detailing the day of publication, number of shares, topic of the content and keyword information. Our goal was to identify a meaningful relationship between the articles and their reach (as measured in shares), with the help of the below libraries.
 
@@ -35,7 +35,7 @@ library(car)
 library(gridExtra)
 ```
 
-DATA CLEANING
+II. DATA CLEANING
 
 The initial data set, downloaded from the University of California Irvine Machine Learning Repository (http://archive.ics.uci.edu/ml/datasets/Online+News+Popularity), had 39644 observations and 61 variables.
 
@@ -130,12 +130,11 @@ data_s = data_s %>%
 ```
 
 III. DATA EXPLORATION
-=======
-DATA EXPLORATION
 
 Our exploration of the data was split into three main areas of focus: Channels (topic of articles), Weekdays (day of publication), and Sentiment Analysis (positive-vs-negative). For each, we summarized and visualized the variables and plotted against shares.
 
-CHANNEL ANALYSIS
+A. CHANNEL ANALYSIS
+
 The data_channel variable is categorical with 7 levels: Entertainment, Business, Social Media, Tech, World, Lifestyle and Other.
 A summary of the data_channel categories provided a good place to start.
 
@@ -203,7 +202,6 @@ The logarithmic version is much more helpful, as we can now see some of the obse
 Before running an ANOVA test, we compared boxplots of the data to compare the variance and see if ANOVA would be a valid method to use.
 
 ```{r channel plot4}
-# check box plot to see if we can use ANOVA
 p4 <- qplot(data=data_s, 
       factor(data_channel), 
       shares, 
@@ -215,8 +213,7 @@ p4
 Without a log scale, the box plots were useless, but with log scale, we can clearly see the ranges, medians and interquartile widths of each category.
 
 ``` {r channel plot5}
-# To adjust for exponential scale, we took the logarthmic value of the # of shares
-p5<- qplot(data=data_s, 
+p5 <- qplot(data=data_s, 
       factor(data_channel), 
       log(shares),
       geom="boxplot") + 
@@ -246,15 +243,16 @@ noOther <- data_s %>%
 count(noOther)/count(data_s)
 ```
 
-85% of the data remained, so we repeating the box plots with the new noOther data set.
+85% of the data remained, so we repeated the box plots with the new noOther data set.
 
 Create a new boxplot
-```{r channel plot 5}
-qplot(data=noOther, 
+```{r channel plot 6}
+p6 <- qplot(data=noOther, 
       factor(data_channel), 
       log(shares), 
       geom="boxplot") + 
   coord_flip()
+p6
 ```
 
 This looks much better, with more similar variances.
@@ -265,8 +263,9 @@ summary(aov(noOther$shares ~ noOther$data_channel))
 ANOVA still has p-value < alpha which is statistically significant. We therefore reject the null hypothesis that there are no differences in the average number of shares for articles of different data_channels. We are confident we can include this in our regression model.
 
 
-WEEKDAY ANALYSIS
-4. Looking at data at the weekday level
+B. WEEKDAY ANALYSIS
+
+The weekday variable is categorical with 7 levels, each representing a day of the week. Once again, we started with a basic summary of the data.
 
 Basic statistical overview of shares per weekday:
 ```{r weekday overview}
@@ -281,17 +280,30 @@ weekday_overview = data_s %>%
 weekday_overview
 ```
 
+The following pieces of information stood out to us:
+1. There were far fewer articles published on Saturday (2453) and Sunday (2737) than the rest of the week, each of which had between 5701 (Friday) and 7435 (Wednesday)
+2. Max shares is much noticeably low for Sunday (83300) and much larger for Wednesday (843300) and Monday (690400) compared to the other days (between 233400 and 441000)
+3. Median shares is much larger on Saturday (2000) and Sunday (1900) than the other days (between 1300 and 1500)
+4. Likewise, average shares per is higher for Saturday (4078) and Sunday (3746) than all the others, except for Monday (3647). All other days have between 3178 and 3303.
+5. Lastly, standard deviation is much lower on Sunday (6214) than Monday (14691), Wednesday (14588) and Saturday (14230). The other days have standard deviation between 8148 and 9798.
+
+We found it interesting that Saturday and Sunday had far fewer articles than the rest of the days, but higher median and average shares per article. Yet, standard deviation for Sunday was less than half that of Saturday.
+
+Keeping in mind the benefits of plotting against shares using a logarithmic scale, we set out to find patterns in the pubication days.
+
 Plotting how number of shares are distributed across weekdays.
 ```{r weekday plot1}
-qplot(data=data_s, 
-      factor(weekday),
-      log(shares), 
-      position="jitter", 
-      colour=factor(weekday),
-      main="Article shares per Weekday",
-      xlab="Weekday",
-      ylab="Log of Shares")
+q1 <- ggplot(data = data_s, 
+        aes(x=factor(weekday), 
+            y = log(shares), 
+            group = as.integer(weekday))) +
+      geom_jitter(alpha=0.15) + 
+      labs(x="Weekday", y="Log of Shares", title="Article shares per Weekday")
+q1 
 ```
+
+
+
 Creating box plots per weekday to see if we can use ANOVA
 ```{r weekday plot2}
 # check box plot to see if we can use ANOVA
