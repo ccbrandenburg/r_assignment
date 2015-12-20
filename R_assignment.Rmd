@@ -55,7 +55,7 @@ log.data = log
 # Set the seed to make results reproducible
 set.seed(27)
 data.subset <- data[, c(2:15)]
-ggpairs(data.subset[sample.int(nrow(data.subset), 1000), ])
+#ggpairs(data.subset[sample.int(nrow(data.subset), 1000), ])
 ```
 
 We selected only those columns that we believed had a higher probability of correlating positively with increased shares. Our decisions were based on the explanations provided for each variable, the descriptive and summary information calculated and the ggpairs plot. The variables we removed either had unclear descriptions, were deemed redundant given other variables provided, or were not interesting enough to pursue in our analysis.
@@ -294,12 +294,18 @@ Keeping in mind the benefits of plotting against shares using a logarithmic scal
 Plotting how number of shares are distributed across weekdays.
 ```{r weekday plot1}
 q1 <- ggplot(data = data_s, 
-        aes(x=factor(weekday), 
+        aes(x=as.integer(weekday), 
             y = log(shares), 
-            group = as.integer(weekday))) +
-      geom_jitter(alpha=0.15) + 
-      labs(x="Weekday", y="Log of Shares", title="Article shares per Weekday")
-q1 
+          ))+
+      geom_jitter(alpha=0.15) +
+      labs(x="Weekday", y="Log of Shares", title="Article shares per Weekday") + 
+    scale_x_discrete(breaks=seq(1,7) , limits=c(1:7))+
+    geom_line(stat= "summary" ,
+              fun.y = mean, color=I("blue")) + 
+    geom_line(stat= "summary" ,
+              fun.y = median, color=I("red")) 
+
+q1  
 ```
 
 
