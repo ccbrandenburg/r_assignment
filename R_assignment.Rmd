@@ -234,7 +234,7 @@ summary(aov(data_s$shares ~ data_s$data_channel))
 The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
 
 We will redo the ANOVA test without data_channel "Other" which has the largest variance
-```{r channels !=other}
+```{r channels not other}
 #REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
 noOther <- data_s %>%
   select(shares, data_channel) %>%
@@ -254,7 +254,7 @@ qplot(data=noOther,
 ```
 
 
-```{r anova channels !=other}
+```{r anova channels not other}
 summary(aov(noOther$shares ~ noOther$data_channel))
 ```
 ANOVA still has p-value < alpha which is statistically significant. We therefore reject H0.
@@ -354,89 +354,9 @@ Question: Mean shares per group
 ```{r}
 anova(data_s$data_channel, data_s$shares)
 ```
+The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
 5. Regression Analysis:
-Images
-```{r images}
-#Videos to shares
-qplot(data=data_s[data_s$data_channel=="World",],
-      num_imgs,
-      shares,
-      xlim=c(0, 25),
-      ylim=c(0,5000),
-      #colour=data_channel,
-      xlab="Number of videos",
-      ylab="Number of Shares",
-      main="Relationship between Shares and videos") +
-  geom_smooth(method="lm", se=FALSE) 
-  
-
-cor(data_s[data_s$data_channel=="World",]$shares, data_s$num_imgs)
-lm
-
-
-# build regression here?
-
-
-
-
-
-
-
-
-
-# rename final model fit for regression diagnostics
-fit <- 
-
-# check for linearity - pattern in residuals?
-qplot(predict(fit), resid(fit), geom="point") + geom_hline(yintercept=0)
-# no clear patterns --> OK
-
-# check for normality - 2 graphs (histogram vs. normal curve & sample-v-theoretical values)
-qplot(rstandard(fit), geom="blank") + geom_histogram(aes(y=..density..), binwidth=0.5) + stat_function(fun=dnorm, args=list(mean=0,sd=1))
-# looks normal --> OK
-
-qplot(sample=rstandard(fit)) + geom_abline(slope=1, intercept=0)
-# follows theoretical line more or less... a little  polynomial looking
-
-# check for  homoschedacity
-qplot(predict(fit), rstandard(fit), geom="point") + geom_hline(yintercept=0) +
-geom_hline(yintercept=2, colour = I("red"), alpha=I(0.5)) +
-geom_hline(yintercept=-2, colour = I("red"), alpha=I(0.5))
-
-
-# check for independence via durbin
-library(car)
-durbinWatsonTest(fit)
-#p-value=0 --> The residuals are not independent.
-
-
-
-# test for outliers
-outlierTest(fit)
-
-# plot most influential variables
-influencePlot(fit)
-
-
-
-
-#Images
-
-#Internal Href Links
-
-#keywords in title
-
-#token length (wordcount)
-
-cor(data_s$weekday, data_s$shares)
-
-
-#Days and cat into factors
-
-```
-
-
 ```{r messing around}
 summary(data_s)
 
@@ -445,13 +365,11 @@ ggplot(aes(y=shares, x=num_imgs), data=data_s) +
   geom_point(alpha=1/20) +
   ylim(0, quantile(data_s$shares, probs=0.95)) +
   geom_smooth(method="lm", color="red")
-  
-  
-
 ```
 
-
-```{r regression}
+REGRESSION ANALYSIS
+We will first create a new dataset to work with
+```{r regression data}
 data_R = data_s %>%
   select(url,
          num_keywords,
@@ -469,95 +387,136 @@ data_R = data_s %>%
          average_token_length,
          shares,
          weekday)
-#correlation between our variables
+```
+Checking correlations between the variables and shares.
+```{r cor check}
 cor(data_R [,unlist(lapply(data_R, is.numeric))])
+```
+It becomes clear that the variables individually do not have a big impact on the amount of shares of articles. We will therefore check different models and see whether we can find a relationship between different variables in combination and shares.
 
-#it's clear that the variables have no big impact on the amount of shares (which is the logical target variable in this data set).
+```{r r sub}
 sub <- lm(data= data_R, abs_title_sentiment_polarity ~ title_sentiment_polarity + title_subjectivity + abs_title_subjectivity) 
 summary(sub)
-
-sub1 <- lm(data= data_R, abs_title_sentiment_polarity ~ (title_sentiment_polarity + title_subjectivity + abs_title_subjectivity)^ 2)
-summary(sub1)
-
-anova(sub,sub1)
-  #sub1 is so far the best model
-
-  #with interaction
-sub2 <- lm(data= data_R, abs_title_sentiment_polarity ~ title_sentiment_polarity + (title_subjectivity + abs_title_subjectivity)^2)
-summary(sub2)
-
-
-sub3 <- lm(data= data_R, abs_title_sentiment_polarity ~ (title_sentiment_polarity + title_subjectivity)^2 + abs_title_subjectivity)
-summary(sub3)
-
-sub4 <- lm(data= data_R, abs_title_sentiment_polarity ~ title_subjectivity + (title_sentiment_polarity + abs_title_subjectivity)^2)
-summary(sub4)
-
-  #polynomial regression models
-sub5 <- lm(data= data_R, abs_title_sentiment_polarity ~ ( I(title_sentiment_polarity^2) + I(title_subjectivity^2) + I(abs_title_subjectivity^2)))
-summary(sub5)
-anova(sub1,sub5)
-  #sub5 is now the best model
-
-sub6 <-  lm(data= data_R, abs_title_sentiment_polarity ~ ( I(title_sentiment_polarity^2) + (title_subjectivity) + (abs_title_subjectivity)))
-summary(sub5)
-anova(sub5,sub6)
-  #we prefer sub6 since this model is less complex
-
-sub7 <- lm(data= data_R, abs_title_sentiment_polarity ~ I(title_sentiment_polarity^2)) 
-summary(sub7)
-anova(sub6,sub7)
-  #anova tells us to go for sub6 since it has significantly the highest R^2
-
-
-
-#Checking linearity
-
-qplot( predict(sub6), resid(sub6),geom= "point") + geom_hline(yintercept = 0)
-    #there clearly seems to be a problem since there is a very clear pattern in the residuals.
-
-#Checking Normality
-
-q1= qplot(rstandard(sub6), geom="blank") + 
-  geom_histogram(aes(y=..density..), colour=I("gray")) +
-  stat_function(fun=dnorm, args=list(mean=0,sd=1), colour=I("red"), alpha=I(0.5))
-
-q2 = qplot(sample=rstandard(sub6)) + geom_abline(slope=1, intercept = 0)
-library(gridExtra)
-grid.arrange(q1,q2,nrow=1)
-#the graphs seem to imply that we cannot go out of a normal distribution of the residuals
-
-# Checking Homoscedasticity
-qplot(predict(sub6),resid(sub6), geom= "point") + geom_hline(y_intercept = 0)
-spreadLevelPlot(sub6)
-  #This doens't look like the homoscedasticity condition can be hold, the line should normally be horizontal and we can   see a clear change of variance in the residuals along the x-axis. 
-
-# Checking Independence
-durbinWatsonTest(sub6)
-  # This test seems to be ok as the null-hypothesis of independence cannot be rejected.
-
-# Checking Multicollinearity
-vif(sub6)
-  # This test shows no Multicollinearity, since all vifs are clearly smaller than 5.
-
-# Outliers
-outlierTest(sub6)
-
-
 ```
 
+```{r r sub1}
+sub1 <- lm(data= data_R, abs_title_sentiment_polarity ~ (title_sentiment_polarity + title_subjectivity + abs_title_subjectivity)^ 2)
+summary(sub1)
+```
 
-TECHNIQUES USED
+```{r r sub 1 comparison}
+anova(sub,sub1)
+```
+sub1 is so far the more superior model.
+
+We will now introduce interaction between variables
+```{r r sub2}
+sub2 <- lm(data= data_R, abs_title_sentiment_polarity ~ title_sentiment_polarity + (title_subjectivity + abs_title_subjectivity)^2)
+summary(sub2)
+```
+
+```{r r sub3}
+sub3 <- lm(data= data_R, abs_title_sentiment_polarity ~ (title_sentiment_polarity + title_subjectivity)^2 + abs_title_subjectivity)
+summary(sub3)
+```
+
+```{r r sub4}
+sub4 <- lm(data= data_R, abs_title_sentiment_polarity ~ title_subjectivity + (title_sentiment_polarity + abs_title_subjectivity)^2)
+summary(sub4)
+```
+
+Introducing polynomial regression models
+```{r r sub5}
+sub5 <- lm(data= data_R, abs_title_sentiment_polarity ~ ( I(title_sentiment_polarity^2) + I(title_subjectivity^2) + I(abs_title_subjectivity^2)))
+summary(sub5)
+```
+Checking which whether sub5 is better than the previous models.
+```{r anova sub 5}
+anova(sub1,sub5)
+```
+So far sub5 seems to be the best model.
+
+Making further adjustments to the model
+```{r r sub6}
+sub6 <-  lm(data= data_R, abs_title_sentiment_polarity ~ ( I(title_sentiment_polarity^2) + (title_subjectivity) + (abs_title_subjectivity)))
+summary(sub6)
+```
+
+Comparing sub5 and sub6
+```{r anova 5 and 6}
+anova(sub5,sub6)
+```
+We prefer sub6 as this model has less complexity.
 
 
+```{r r sub7}
+sub7 <- lm(data= data_R, abs_title_sentiment_polarity ~ I(title_sentiment_polarity^2)) 
+summary(sub7)
+```
 
-Reducing Data:
-1. __filter__    : To select some rows of the dataset
-2. __select__    : To select columns
-3. __arrange__   : To sort observations
-4. __mutate__    : To modify the structure of the dataset (add variables, etc.)
-5. __summarize__ : Together with group_by(), used to reduce variables to values
+Comparing sub6 and sub7
+```{r anova 6 and 7}
+anova(sub6,sub7)
+```
+ANOVA tells us to go for sub6 since it has significantly the highest R^2
 
+
+Checking Linearity
+```{r linearity}
+qplot( predict(sub6), 
+       resid(sub6),
+       geom= "point") + 
+  geom_hline(yintercept = 0)
+```
+There clearly seems to be a problem since there is a very clear pattern in the residuals.
+
+Checking Normality
+```{r normality}
+q1= qplot(rstandard(sub6), 
+          geom="blank") + 
+  geom_histogram(aes(y=..density..), 
+                 colour=I("gray")) +
+  stat_function(fun=dnorm, 
+                args=list(mean=0,sd=1), 
+                colour=I("red"), 
+                alpha=I(0.5))
+
+q2 = qplot(sample=rstandard(sub6)) + 
+  geom_abline(slope=1, 
+              intercept = 0)
+
+#arranging graphs in grid
+grid.arrange(q1,q2,nrow=1)
+```
+The graphs seem to imply that we cannot go out of a normal distribution of the residuals.
+
+Checking Homoscedasticity
+```{r homoscedasticity}
+qplot(predict(sub6),
+      resid(sub6), 
+      geom= "point") + 
+  geom_hline(y_intercept = 0)
+
+spreadLevelPlot(sub6)
+```
+This doens't look like the homoscedasticity condition can be hold, the line should normally be horizontal and we can see a clear change of variance in the residuals along the x-axis. 
+
+Checking Independence
+```{r independence}
+durbinWatsonTest(sub6)
+```
+This test seems to be ok as the null-hypothesis of independence cannot be rejected.
+
+Checking Multicollinearity
+```{r multicol}
+vif(sub6)
+```
+This test shows no Multicollinearity, since all vifs are clearly smaller than 5.
+
+Checking Outliers
+```{r outliers}
+outlierTest(sub6)
+```
 
 
 
