@@ -182,13 +182,13 @@ The following graphs are used to understand whether there are visual differences
 qpos = qplot(data=data_s,
       rate_positive_words,
       shares,
-      log="xy") +
+      log="xy" , color=data_channel) +
   geom_point(alpha=1/200)
 
 qneg = qplot(data=data_s,
       rate_negative_words,
       shares,
-      log="xy") +
+      log="xy" , color=data_channel) +
   geom_point(alpha=1/200)
 
 grid.arrange(qpos, qneg, nrow=1)
@@ -216,9 +216,8 @@ category_overview
 
 The following section tries to provide a visual overview of how shares are distributed across channels.
 ```{r channel plot1}
-qplot(data=data_s,
-      factor(data_channel), 
-      shares)
+p <- ggplot(data_s , aes(factor(data_channel), shares))
+p+geom_boxplot() + geom_jitter()
 ```
 
 ```{r channel plot2}
@@ -267,7 +266,7 @@ summary(aov(data_s$shares ~ data_s$data_channel))
 The p-value is <2e-16, so with 95% confidence we can accept that there are statistically significant differences in number of shares between the different topics.
 
 We will redo the ANOVA test without data_channel "Other" which has the largest variance
-```{r channels !=other}
+```{r channels is not equal other}
 #REDO ANOVA WITHOUT DATA_CHANNEL=OTHER WHICH HAS THE LARGEST VARIANCE
 noOther <- data_s %>%
   select(shares, data_channel) %>%
@@ -385,7 +384,7 @@ max(data_s$shares)
 
 Question: Mean shares per group
 ```{r}
-anova(data_s$data_channel, data_s$shares)
+summary(aov(data_s$shares ~ data_s$data_channel))
 ```
 The p-value is 0.000734 and less than the significance level of 5% so we do reject H0 and have statistically significant evidence that the number of shares differ between weekdays and weekends.
 
