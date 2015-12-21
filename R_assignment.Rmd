@@ -369,7 +369,6 @@ To compare the average shares, we use a t-test.
 
 ```{r anova weekday flag}
 with(data=data_s, t.test(shares[weekday_flag==1], shares[weekday_flag==0]))
-#t.test(data_s$avg_shares[data_s$weekday_flag==1], data_s$avg_shares[data_s$weekday_flag==0], paired=TRUE)
 ```
 The p-value is < 0.05 and less than the significance level of 5% so we reject the null hypothesis that average shares are the same for articles published on weekends or during the week.
 
